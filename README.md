@@ -1,2 +1,2 @@
 # appihq
-Choose your massage therapist. Get a massage
+Get the massage you need. Choose your therapist
