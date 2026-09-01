@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import FavoriteButton from "./favorite-button";
 import { therapists } from "./therapists";
+import TherapistsListClient from "./TherapistsListClient";
 
 export const metadata: Metadata = {
   title: "Available Therapists | Appi",
@@ -40,44 +41,25 @@ export default function TherapistsListPage() {
             className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-black dark:hover:bg-zinc-200 dark:focus:ring-white"
           >
             Request a Massage
+            <span>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="size-5"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </span>
           </Link>
         </div>
       </header>
 
-      <section className="mx-auto w-full max-w-6xl px-2 py-8 sm:px-8 sm:py-10">
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          {therapists.map((therapist) => (
-            <article
-              key={therapist.firstName}
-              className="group relative overflow-hidden rounded-sm border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-900 dark:bg-zinc-950"
-            >
-              <Link
-                href={`/therapists-list/${therapist.slug}`}
-                aria-label={`View ${therapist.firstName}'s therapist profile`}
-                className="block"
-              >
-                <div className="relative aspect-[4/6] overflow-hidden bg-zinc-200 dark:bg-zinc-900">
-                  <Image
-                    src={therapist.image}
-                    alt={`${therapist.firstName}, Appi massage therapist`}
-                    fill
-                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover transition duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 pt-16">
-                    <h2 className="text-2xl font-semibold tracking-tight text-white">
-                      {therapist.firstName}, {therapist.age}
-                    </h2>
-                  </div>
-                </div>
-              </Link>
-              <div className="absolute right-3 top-3 z-10">
-                <FavoriteButton therapistName={therapist.firstName} />
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+      <TherapistsListClient therapists={therapists} initialLocation="New York, NY" />
     </main>
   );
 }

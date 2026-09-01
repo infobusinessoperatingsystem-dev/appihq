@@ -199,6 +199,30 @@ export default async function TherapistProfilePage({
                 ))}
               </div>
             </section>
+
+            <section className="mt-6" aria-labelledby="reviews">
+              <h3 id="reviews" className="text-base font-semibold">
+                Reviews
+              </h3>
+              <div className="mt-3 space-y-4">
+                {therapist.reviews && therapist.reviews.length > 0 ? (
+                  therapist.reviews.map((r, i) => (
+                    <div key={i} className="rounded-lg border border-zinc-100 p-3 dark:border-zinc-800">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{r.author}</p>
+                          {r.date && <p className="text-xs text-zinc-500">{r.date}</p>}
+                        </div>
+                        <div className="text-amber-400 font-semibold">★ {r.rating}</div>
+                      </div>
+                      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{r.text}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-zinc-500">No reviews yet.</p>
+                )}
+              </div>
+            </section>
           </div>
 
           <footer className="sticky bottom-0 grid grid-cols-[1fr_auto] items-center gap-4 border-t border-zinc-100 bg-white/95 px-5 py-4 backdrop-blur dark:border-zinc-900 dark:bg-zinc-950/95">
