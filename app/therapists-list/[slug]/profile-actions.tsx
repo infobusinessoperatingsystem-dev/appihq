@@ -6,6 +6,7 @@ type ToastMessage = "share" | "book" | null;
 
 type ProfileActionsProps = {
   therapistName: string;
+  therapistSlug?: string;
 };
 
 function useToastTimeout() {
@@ -91,10 +92,19 @@ export function ShareButton({ therapistName }: ProfileActionsProps) {
   );
 }
 
-export function BookButton({ therapistName }: ProfileActionsProps) {
+import { useRouter } from "next/navigation";
+
+export function BookButton({ therapistName, therapistSlug }: ProfileActionsProps) {
   const { showToast, toast } = useToastTimeout();
+  const router = useRouter();
 
   function handleBook() {
+    // If slug provided, navigate to booking page, otherwise show temporary toast
+    if (therapistSlug) {
+      router.push(`/therapists-list/${therapistSlug}/book`);
+      return;
+    }
+
     showToast("book");
   }
 

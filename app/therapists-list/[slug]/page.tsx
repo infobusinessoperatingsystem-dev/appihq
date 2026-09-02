@@ -10,7 +10,7 @@ type TherapistProfilePageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return therapists.map((therapist) => ({
@@ -234,7 +234,7 @@ export default async function TherapistProfilePage({
                 {therapist.duration}
               </p>
             </div>
-            <BookButton therapistName={therapist.firstName} />
+            <BookButton therapistName={therapist.firstName} therapistSlug={therapist.slug} />
           </footer>
         </article>
       </section>

@@ -40,8 +40,8 @@ export default function TherapistsListPage() {
             aria-label="Back to Appi home"
             className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-black dark:hover:bg-zinc-200 dark:focus:ring-white"
           >
-            Request a Massage
-            <span>
+            Bookings
+            {/* <span>
               <svg
                 aria-hidden="true"
                 viewBox="0 0 24 24"
@@ -54,7 +54,7 @@ export default function TherapistsListPage() {
               >
                 <path d="M6 9l6 6 6-6" />
               </svg>
-            </span>
+            </span> */}
           </Link>
         </div>
       </header>

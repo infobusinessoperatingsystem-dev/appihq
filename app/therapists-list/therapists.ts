@@ -1,3 +1,17 @@
+export type MassageOffering = {
+  massageType: string;
+  durationMinutes: number;
+  price: number;
+};
+
+export type TherapistAvailability = {
+  date: string; // ISO date yyyy-mm-dd
+  startTime: string; // HH:MM (24h)
+  endTime: string; // HH:MM (24h)
+};
+
+export type ServiceLocation = "home" | "hotel" | "walk-in";
+
 export type Therapist = {
   slug: string;
   firstName: string;
@@ -18,6 +32,11 @@ export type Therapist = {
   isNew?: boolean;
   isVerified?: boolean;
   reviews?: { author: string; rating: number; text: string; date?: string }[];
+
+  // New booking-driven fields
+  massageOfferings?: MassageOffering[];
+  availability?: TherapistAvailability[];
+  serviceLocations?: ServiceLocation[];
 };
 
 export const therapists: Therapist[] = [
@@ -44,6 +63,15 @@ export const therapists: Therapist[] = [
     visitTypes: ["At Home", "Hotel", "Office"],
     about:
       "Maya is a licensed massage therapist focused on calm, restorative sessions for stress relief and full-body relaxation. She adapts pressure and technique to each client.",
+    massageOfferings: [
+      { massageType: "Swedish", durationMinutes: 60, price: 320 },
+      { massageType: "Aromatherapy", durationMinutes: 75, price: 380 },
+    ],
+    availability: [
+      { date: "2026-09-05", startTime: "09:00", endTime: "15:00" },
+      { date: "2026-09-06", startTime: "11:00", endTime: "18:00" },
+    ],
+    serviceLocations: ["home", "hotel", "walk-in"],
   },
   {
     slug: "jordan",
@@ -68,6 +96,15 @@ export const therapists: Therapist[] = [
     visitTypes: ["At Home", "Hotel", "Office"],
     about:
       "Jordan specializes in focused bodywork for tight muscles, desk tension, and active recovery. His sessions are structured, steady, and pressure-aware.",
+    massageOfferings: [
+      { massageType: "Deep Tissue", durationMinutes: 60, price: 300 },
+      { massageType: "Sports", durationMinutes: 90, price: 420 },
+    ],
+    availability: [
+      { date: "2026-09-05", startTime: "10:00", endTime: "16:00" },
+      { date: "2026-09-07", startTime: "08:00", endTime: "12:00" },
+    ],
+    serviceLocations: ["home", "hotel", "walk-in"],
   },
   {
     slug: "nia",
@@ -92,6 +129,14 @@ export const therapists: Therapist[] = [
     visitTypes: ["At Home", "Hotel", "Office"],
     about:
       "Nia brings a slower, grounding approach to massage, using heat and gentle pressure to help clients unwind while easing tension across the back and shoulders.",
+    massageOfferings: [
+      { massageType: "Hot Stone", durationMinutes: 75, price: 360 },
+      { massageType: "Restorative", durationMinutes: 60, price: 340 },
+    ],
+    availability: [
+      { date: "2026-09-06", startTime: "12:00", endTime: "20:00" },
+    ],
+    serviceLocations: ["hotel", "walk-in"],
   },
   {
     slug: "elliot",
@@ -116,6 +161,15 @@ export const therapists: Therapist[] = [
     visitTypes: ["At Home", "Hotel", "Office"],
     about:
       "Elliot is known for balanced pressure and smooth session flow, making him a good fit for first-time clients, couples bookings, and relaxation-focused visits.",
+    massageOfferings: [
+      { massageType: "Couples", durationMinutes: 60, price: 340 },
+      { massageType: "Relaxation", durationMinutes: 45, price: 280 },
+    ],
+    availability: [
+      { date: "2026-09-05", startTime: "14:00", endTime: "20:00" },
+      { date: "2026-09-07", startTime: "09:00", endTime: "13:00" },
+    ],
+    serviceLocations: ["home", "hotel"],
   },
   {
     slug: "sofia",
@@ -145,6 +199,15 @@ export const therapists: Therapist[] = [
       { author: "Lena", rating: 5, text: "Amazing pressure and technique.", date: "2026-08-10" },
       { author: "Jon", rating: 5, text: "Helped my sore hamstring recover fast.", date: "2026-07-22" },
     ],
+    massageOfferings: [
+      { massageType: "Sports", durationMinutes: 60, price: 380 },
+      { massageType: "Deep Tissue", durationMinutes: 90, price: 520 },
+    ],
+    availability: [
+      { date: "2026-09-05", startTime: "08:00", endTime: "12:00" },
+      { date: "2026-09-06", startTime: "10:00", endTime: "18:00" },
+    ],
+    serviceLocations: ["home", "hotel"],
   },
   {
     slug: "liam",
@@ -169,6 +232,14 @@ export const therapists: Therapist[] = [
     reviews: [
       { author: "Marta", rating: 5, text: "Very professional and knowledgeable.", date: "2026-08-18" },
     ],
+    massageOfferings: [
+      { massageType: "Sports", durationMinutes: 60, price: 300 },
+      { massageType: "Deep Tissue", durationMinutes: 60, price: 320 },
+    ],
+    availability: [
+      { date: "2026-09-06", startTime: "09:00", endTime: "14:00" },
+    ],
+    serviceLocations: ["home", "walk-in"],
   },
   {
     slug: "aisha",
@@ -193,6 +264,14 @@ export const therapists: Therapist[] = [
     reviews: [
       { author: "Priya", rating: 5, text: "So relaxing — I slept so well after.", date: "2026-06-12" },
     ],
+    massageOfferings: [
+      { massageType: "Aromatherapy", durationMinutes: 60, price: 310 },
+      { massageType: "Relaxation", durationMinutes: 45, price: 260 },
+    ],
+    availability: [
+      { date: "2026-09-07", startTime: "10:00", endTime: "16:00" },
+    ],
+    serviceLocations: ["hotel", "walk-in"],
   },
   {
     slug: "carlos",
@@ -217,6 +296,14 @@ export const therapists: Therapist[] = [
     reviews: [
       { author: "Abe", rating: 4, text: "Tough but effective.", date: "2026-08-01" },
     ],
+    massageOfferings: [
+      { massageType: "Trigger Point", durationMinutes: 75, price: 350 },
+      { massageType: "Pain Relief", durationMinutes: 90, price: 430 },
+    ],
+    availability: [
+      { date: "2026-09-05", startTime: "12:00", endTime: "18:00" },
+    ],
+    serviceLocations: ["home"],
   },
   {
     slug: "priya",
@@ -241,6 +328,15 @@ export const therapists: Therapist[] = [
     reviews: [
       { author: "Dana", rating: 5, text: "Lovely technique and very kind.", date: "2026-08-25" },
     ],
+    massageOfferings: [
+      { massageType: "Swedish", durationMinutes: 45, price: 280 },
+      { massageType: "Relaxation", durationMinutes: 60, price: 320 },
+    ],
+    availability: [
+      { date: "2026-09-05", startTime: "09:00", endTime: "12:00" },
+      { date: "2026-09-06", startTime: "13:00", endTime: "18:00" },
+    ],
+    serviceLocations: ["home", "hotel"],
   },
   {
     slug: "noah",
