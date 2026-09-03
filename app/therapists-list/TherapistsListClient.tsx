@@ -14,48 +14,22 @@ type Props = {
 const PAGE_SIZE = 3;
 
 export default function TherapistsListClient({ therapists, initialLocation }: Props) {
-  const [selectedLocation, setSelectedLocation] = useState<string>(
-    initialLocation || "New York, NY"
-  );
-
-  const locations = useMemo(() => {
-    const set = new Set<string>();
-    therapists.forEach((t) => set.add(t.location));
-    return Array.from(set);
-  }, [therapists]);
-
   const categories = useMemo(() => {
-    const available = therapists.filter((t) => t.location === selectedLocation);
     const topRated = [...therapists].sort((a, b) => Number(b.rating) - Number(a.rating));
     const specialists = therapists.filter((t) => t.specialties && t.specialties.length > 0);
     const newVerified = therapists.filter((t) => t.isNew && t.isVerified);
+    const available = therapists; // will be filtered by category UI (Kumasi / Accra)
     return [
       { key: "available", title: "Available at Your Location", items: available },
       { key: "top", title: "Top Rated", items: topRated },
       { key: "specialists", title: "Specialists", items: specialists },
       { key: "new", title: "New & Verified", items: newVerified },
     ];
-  }, [therapists, selectedLocation]);
+  }, [therapists]);
 
   return (
     <section className="mx-auto w-full max-w-6xl px-2 py-8 sm:px-8 sm:py-10">
-      <div className="mx-auto mb-6 flex items-center justify-between max-w-6xl px-2 sm:px-8">
-        <div className="flex items-center gap-3">
-          <label className="text-sm font-medium">Your location</label>
-          <select
-            aria-label="Select your location"
-            value={selectedLocation}
-            onChange={(e) => setSelectedLocation(e.target.value)}
-            className="rounded-md border px-3 py-2 text-sm"
-          >
-            {locations.map((loc) => (
-              <option key={loc} value={loc}>
-                {loc}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      {/* No global location selector — per-category filters are shown in each section */}
 
       <div className="space-y-6">
         {categories.map((cat) => (
@@ -70,18 +44,80 @@ function CategorySection({ title, items, categoryKey }: { title: string; items: 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  const filtersForCategory = useMemo(() => {
+    switch (categoryKey) {
+      case "available":
+        return ["All", "Kumasi", "Accra"];
+      case "top":
+        return ["All", "5★", "4★+"];
+      case "specialists":
+        return ["All", "Sports", "Deep Tissue"];
+      case "new":
+        return ["All", "Verified", "Recent"];
+      default:
+        return ["All"];
+    }
+  }, [categoryKey]);
+
+  const storageKey = `therapists.filter.${categoryKey}`;
+  const [activeFilter, setActiveFilter] = useState<string>("All");
+  const hasLoadedRef = useRef(false);
+
+  // Load persisted filter for this category on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved && filtersForCategory.includes(saved)) {
+        setActiveFilter(saved);
+      }
+    } catch (e) {
+      // ignore
+    }
+    hasLoadedRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist when activeFilter changes after initial load
+  useEffect(() => {
+    if (!hasLoadedRef.current) return;
+    try {
+      localStorage.setItem(storageKey, activeFilter);
+    } catch (e) {
+      // ignore
+    }
+  }, [activeFilter, storageKey]);
+
+  const displayedItems = useMemo(() => {
+    if (activeFilter === "All") return items;
+    if (categoryKey === "available") {
+      return items.filter((t) => t.location === activeFilter);
+    }
+    if (categoryKey === "top") {
+      if (activeFilter === "5★") return items.filter((t) => Math.round(Number(t.rating)) === 5);
+      if (activeFilter === "4★+") return items.filter((t) => Number(t.rating) >= 4);
+    }
+    if (categoryKey === "specialists") {
+      return items.filter((t) => (t.specialties || []).some((s) => s.toLowerCase().includes(activeFilter.toLowerCase())));
+    }
+    if (categoryKey === "new") {
+      if (activeFilter === "Verified") return items.filter((t) => t.isVerified);
+      if (activeFilter === "Recent") return items.filter((t) => t.isNew);
+    }
+    return items;
+  }, [items, activeFilter, categoryKey]);
+
   useEffect(() => {
     setCurrentIndex(0);
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ left: 0, behavior: "auto" });
     }
-  }, [items]);
+  }, [displayedItems]);
 
-  const clampIndex = (nextIndex: number) => Math.min(Math.max(nextIndex, 0), Math.max(items.length - 1, 0));
+  const clampIndex = (nextIndex: number) => Math.min(Math.max(nextIndex, 0), Math.max(displayedItems.length - 1, 0));
 
   const scrollToIndex = (nextIndex: number) => {
     const container = scrollRef.current;
-    if (!container || items.length === 0) return;
+    if (!container || displayedItems.length === 0) return;
 
     const cards = container.querySelectorAll<HTMLElement>("[data-therapist-card]");
     if (!cards.length) return;
@@ -108,9 +144,9 @@ function CategorySection({ title, items, categoryKey }: { title: string; items: 
     setCurrentIndex(clampIndex(nextIndex));
   };
 
-  const maxIndex = Math.max(items.length - 1, 0);
-  const canGoPrev = currentIndex > 0 && items.length > 0;
-  const canGoNext = currentIndex < maxIndex && items.length > 0;
+  const maxIndex = Math.max(displayedItems.length - 1, 0);
+  const canGoPrev = currentIndex > 0 && displayedItems.length > 0;
+  const canGoNext = currentIndex < maxIndex && displayedItems.length > 0;
 
   return (
     <section className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
@@ -139,9 +175,28 @@ function CategorySection({ title, items, categoryKey }: { title: string; items: 
           </button>
         </div>
       </div>
+        <div>
+          {/* Category filter buttons (horizontal) */}
+          <div className="mb-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {filtersForCategory.map((f) => (
+              <button
+                key={f}
+                onClick={() => {
+                  setActiveFilter(f);
+                  setCurrentIndex(0);
+                  if (scrollRef.current) scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+                }}
+                className={`whitespace-nowrap rounded-full px-3 py-1 text-sm border ${activeFilter === f ? "bg-foreground text-background border-foreground" : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-200"}`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+
+        </div>
 
       <div className="overflow-hidden">
-        {items.length === 0 ? (
+        {displayedItems.length === 0 ? (
           <p className="text-sm text-zinc-500">No therapists found.</p>
         ) : (
           <div
@@ -149,7 +204,7 @@ function CategorySection({ title, items, categoryKey }: { title: string; items: 
             onScroll={handleScroll}
             className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] [scroll-behavior:smooth] [&::-webkit-scrollbar]:hidden"
           >
-            {items.map((therapist) => (
+            {displayedItems.map((therapist) => (
               <article
                 key={therapist.slug}
                 data-therapist-card
