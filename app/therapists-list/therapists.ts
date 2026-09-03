@@ -31,6 +31,7 @@ export type Therapist = {
   about: string;
   isNew?: boolean;
   isVerified?: boolean;
+  joinedAt?: string;
   reviews?: { author: string; rating: number; text: string; date?: string }[];
 
   // New booking-driven fields
@@ -63,6 +64,7 @@ export const therapists: Therapist[] = [
     visitTypes: ["At Home", "Hotel", "Office"],
     about:
       "Maya is a licensed massage therapist focused on calm, restorative sessions for stress relief and full-body relaxation. She adapts pressure and technique to each client.",
+    joinedAt: "2026-08-20T09:00:00Z",
     massageOfferings: [
       { massageType: "Swedish", durationMinutes: 60, price: 320 },
       { massageType: "Aromatherapy", durationMinutes: 75, price: 380 },
@@ -96,6 +98,7 @@ export const therapists: Therapist[] = [
     visitTypes: ["At Home", "Hotel", "Office"],
     about:
       "Jordan specializes in focused bodywork for tight muscles, desk tension, and active recovery. His sessions are structured, steady, and pressure-aware.",
+    joinedAt: "2026-08-11T10:00:00Z",
     massageOfferings: [
       { massageType: "Deep Tissue", durationMinutes: 60, price: 300 },
       { massageType: "Sports", durationMinutes: 90, price: 420 },
@@ -126,6 +129,7 @@ export const therapists: Therapist[] = [
     about: "Kwame focuses on recovery work for athletes and active clients, blending firm pressure with mobility drills.",
     isNew: false,
     isVerified: true,
+    joinedAt: "2026-04-22T08:00:00Z",
     reviews: [
       { author: "Ama", rating: 5, text: "Great pressure and relief after sessions.", date: "2026-07-11" },
     ],
@@ -159,6 +163,7 @@ export const therapists: Therapist[] = [
     about: "Abena creates soothing, restorative sessions focused on breath-and-touch to ease stress and tension.",
     isNew: true,
     isVerified: true,
+    joinedAt: "2026-08-30T08:00:00Z",
     reviews: [
       { author: "Kojo", rating: 5, text: "So relaxing — highly recommend!", date: "2026-08-20" },
     ],
@@ -194,6 +199,7 @@ export const therapists: Therapist[] = [
     visitTypes: ["At Home", "Hotel", "Office"],
     about:
       "Nia brings a slower, grounding approach to massage, using heat and gentle pressure to help clients unwind while easing tension across the back and shoulders.",
+    joinedAt: "2026-08-24T12:00:00Z",
     massageOfferings: [
       { massageType: "Hot Stone", durationMinutes: 75, price: 360 },
       { massageType: "Restorative", durationMinutes: 60, price: 340 },
@@ -226,6 +232,7 @@ export const therapists: Therapist[] = [
     visitTypes: ["At Home", "Hotel", "Office"],
     about:
       "Elliot is known for balanced pressure and smooth session flow, making him a good fit for first-time clients, couples bookings, and relaxation-focused visits.",
+    joinedAt: "2026-08-18T11:30:00Z",
     massageOfferings: [
       { massageType: "Couples", durationMinutes: 60, price: 340 },
       { massageType: "Relaxation", durationMinutes: 45, price: 280 },
@@ -260,6 +267,7 @@ export const therapists: Therapist[] = [
       "Sofia works with athletes and active clients to speed recovery and improve mobility.",
     isNew: false,
     isVerified: true,
+    joinedAt: "2026-05-03T09:00:00Z",
     reviews: [
       { author: "Lena", rating: 5, text: "Amazing pressure and technique.", date: "2026-08-10" },
       { author: "Jon", rating: 5, text: "Helped my sore hamstring recover fast.", date: "2026-07-22" },
@@ -294,6 +302,7 @@ export const therapists: Therapist[] = [
     about: "Liam specializes in post-workout recovery and mobility work.",
     isNew: true,
     isVerified: true,
+    joinedAt: "2026-08-29T07:45:00Z",
     reviews: [
       { author: "Marta", rating: 5, text: "Very professional and knowledgeable.", date: "2026-08-18" },
     ],
@@ -326,6 +335,7 @@ export const therapists: Therapist[] = [
     about: "Gentle, calming sessions with aromatic oils.",
     isNew: false,
     isVerified: true,
+    joinedAt: "2026-06-15T13:00:00Z",
     reviews: [
       { author: "Priya", rating: 5, text: "So relaxing — I slept so well after.", date: "2026-06-12" },
     ],
@@ -358,6 +368,7 @@ export const therapists: Therapist[] = [
     about: "Focused work for chronic tension and trigger points.",
     isNew: true,
     isVerified: false,
+    joinedAt: "2026-08-31T15:00:00Z",
     reviews: [
       { author: "Abe", rating: 4, text: "Tough but effective.", date: "2026-08-01" },
     ],
@@ -390,6 +401,7 @@ export const therapists: Therapist[] = [
     about: "Warm, attentive Swedish massage sessions.",
     isNew: true,
     isVerified: true,
+    joinedAt: "2026-08-28T17:00:00Z",
     reviews: [
       { author: "Dana", rating: 5, text: "Lovely technique and very kind.", date: "2026-08-25" },
     ],
@@ -423,6 +435,7 @@ export const therapists: Therapist[] = [
     about: "Great for couples and shared relaxation sessions.",
     isNew: false,
     isVerified: false,
+    joinedAt: "2026-02-12T09:30:00Z",
     reviews: [
       { author: "S & M", rating: 5, text: "Fantastic couples session.", date: "2026-05-18" },
     ],

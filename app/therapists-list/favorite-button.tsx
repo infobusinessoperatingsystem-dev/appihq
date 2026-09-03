@@ -10,7 +10,10 @@ export default function FavoriteButton({ therapistName }: FavoriteButtonProps) {
   const [showToast, setShowToast] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function handleFavoriteClick() {
+  function handleFavoriteClick(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }

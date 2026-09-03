@@ -17,13 +17,13 @@ export default function TherapistsListClient({ therapists, initialLocation }: Pr
   const categories = useMemo(() => {
     const topRated = [...therapists].sort((a, b) => Number(b.rating) - Number(a.rating));
     const specialists = therapists.filter((t) => t.specialties && t.specialties.length > 0);
-    const newVerified = therapists.filter((t) => t.isNew && t.isVerified);
+    const newTherapists = therapists.filter((t) => t.isNew);
     const available = therapists; // will be filtered by category UI (Kumasi / Accra)
     return [
       { key: "available", title: "Available at Your Location", items: available },
       { key: "top", title: "Top Rated", items: topRated },
       { key: "specialists", title: "Specialists", items: specialists },
-      { key: "new", title: "New & Verified", items: newVerified },
+      { key: "new", title: "New", items: newTherapists },
     ];
   }, [therapists]);
 
@@ -53,7 +53,7 @@ function CategorySection({ title, items, categoryKey }: { title: string; items: 
       case "specialists":
         return ["All", "Sports", "Deep Tissue"];
       case "new":
-        return ["All", "Verified", "Recent"];
+        return ["All", "Recent"];
       default:
         return ["All"];
     }
@@ -100,7 +100,6 @@ function CategorySection({ title, items, categoryKey }: { title: string; items: 
       return items.filter((t) => (t.specialties || []).some((s) => s.toLowerCase().includes(activeFilter.toLowerCase())));
     }
     if (categoryKey === "new") {
-      if (activeFilter === "Verified") return items.filter((t) => t.isVerified);
       if (activeFilter === "Recent") return items.filter((t) => t.isNew);
     }
     return items;
@@ -149,7 +148,9 @@ function CategorySection({ title, items, categoryKey }: { title: string; items: 
   const canGoNext = currentIndex < maxIndex && displayedItems.length > 0;
 
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+    <section 
+    className="p-2 sm:p-4 md:p-6 lg:p-8"
+    >
       <div className="mb-4 flex items-center justify-between gap-3">
         <h3 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">{title}</h3>
         <div className="flex items-center gap-2">
@@ -208,27 +209,24 @@ function CategorySection({ title, items, categoryKey }: { title: string; items: 
               <article
                 key={therapist.slug}
                 data-therapist-card
-                className="group flex min-w-[220px] max-w-[240px] snap-start flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shadow-sm transition-all duration-200 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+                className="group flex min-w-[240px] max-w-[260px] snap-start flex-1 flex-col overflow-hidden"
               >
-                <Link href={`/therapists-list/${therapist.slug}`} className="relative block h-36 w-full overflow-hidden">
+                <Link href={`/therapists-list/${therapist.slug}`} className="relative rounded-xl border border-zinc-200 bg-zinc-50 shadow-sm transition-all duration-200 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 block h-74 w-full overflow-hidden">
                   <Image src={therapist.image} alt={therapist.firstName} fill sizes="(min-width: 768px) 14rem, 70vw" className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                  <div className="absolute top-2 right-2 z-10">
+                    <FavoriteButton therapistName={therapist.firstName} />
+                  </div>
                 </Link>
 
-                <div className="flex flex-1 flex-col p-3">
+                <div className="flex flex-1 flex-col py-3">
                   <div className="flex items-start justify-between gap-2">
                     <Link href={`/therapists-list/${therapist.slug}`} className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
                       {therapist.firstName}, {therapist.age}
                     </Link>
-                    <FavoriteButton therapistName={therapist.firstName} />
                   </div>
 
-                  <div className="mt-2 text-xs leading-5 text-zinc-600 dark:text-zinc-300">
+                  <div className="mt-1 text-xs leading-5 text-zinc-600 dark:text-zinc-300">
                     <CategoryDetails therapist={therapist} categoryKey={categoryKey} />
-                  </div>
-
-                  <div className="mt-3 flex items-center justify-between rounded-md bg-white px-2.5 py-2 text-xs dark:bg-black">
-                    <span className="font-medium text-zinc-900 dark:text-zinc-50">{therapist.price}</span>
-                    <span className="text-zinc-500 dark:text-zinc-400">{therapist.duration}</span>
                   </div>
                 </div>
               </article>
@@ -240,22 +238,42 @@ function CategorySection({ title, items, categoryKey }: { title: string; items: 
   );
 }
 
+function formatJoinedLabel(joinedAt?: string) {
+  if (!joinedAt) return "Joined recently";
+
+  const diffMs = Date.now() - new Date(joinedAt).getTime();
+  const diffMinutes = Math.max(1, Math.floor(diffMs / (1000 * 60)));
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 0) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+  if (diffHours > 0) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
+  return `${diffMinutes} minute${diffMinutes === 1 ? "" : "s"} ago`;
+}
+
 function CategoryDetails({ therapist, categoryKey }: { therapist: Therapist; categoryKey: string }) {
   switch (categoryKey) {
     case "available":
       return (
         <div className="space-y-1">
           <div className="flex items-center gap-1.5">
-            <span>📍</span>
-            <span>{therapist.location}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span>📏</span>
-            <span>{therapist.distance}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span>★</span>
-            <span>{therapist.rating} ({therapist.reviewCount} reviews)</span>
+            <span>
+              <svg
+  aria-hidden="true"
+  viewBox="0 0 24 24"
+  className="size-4 text-zinc-500"
+  fill="none"
+  stroke="currentColor"
+  strokeLinecap="round"
+  strokeLinejoin="round"
+  strokeWidth="2"
+>
+  <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+  <circle cx="12" cy="10" r="2.5" />
+</svg>
+            </span>
+            <span>{therapist.location}, GH
+            </span>
           </div>
         </div>
       );
@@ -263,16 +281,21 @@ function CategoryDetails({ therapist, categoryKey }: { therapist: Therapist; cat
       return (
         <div className="space-y-1">
           <div className="flex items-center gap-1.5">
-            <span>★</span>
-            <span>{therapist.rating} rating</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span>💬</span>
-            <span>{therapist.reviewCount} reviews</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span>🧠</span>
-            <span>{therapist.specialty}</span>
+            <span>
+              <svg
+  aria-hidden="true"
+  viewBox="0 0 24 24"
+  className="size-4 text-zinc-500"
+  fill="none"
+  stroke="currentColor"
+  strokeLinecap="round"
+  strokeLinejoin="round"
+  strokeWidth="2"
+>
+  <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z" />
+</svg>
+            </span>
+            <span>{therapist.rating} ({therapist.reviewCount} reviews)</span>
           </div>
         </div>
       );
@@ -280,16 +303,43 @@ function CategoryDetails({ therapist, categoryKey }: { therapist: Therapist; cat
       return (
         <div className="space-y-1">
           <div className="flex items-center gap-1.5">
-            <span>🎯</span>
+            <span>
+              <svg
+  aria-hidden="true"
+  viewBox="0 0 24 24"
+  className="size-4 text-zinc-500"
+  fill="none"
+  stroke="currentColor"
+  strokeLinecap="round"
+  strokeLinejoin="round"
+  strokeWidth="2"
+>
+  <path d="M7 11V5a1.5 1.5 0 0 1 3 0v5" />
+  <path d="M10 10V3.5a1.5 1.5 0 0 1 3 0V10" />
+  <path d="M13 10V5a1.5 1.5 0 0 1 3 0v6" />
+  <path d="M16 11V7.5a1.5 1.5 0 0 1 3 0v6.2a6 6 0 0 1-6 6.3h-1.5a6 6 0 0 1-5.2-3L4 13.5a1.5 1.5 0 0 1 2.6-1.5L9 15" />
+  <path d="m19 2 .5 1.5L21 4l-1.5.5L19 6l-.5-1.5L17 4l1.5-.5L19 2Z" />
+</svg>
+            </span>
             <span>{therapist.specialty}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span>⏱</span>
+            <span>
+             <svg
+  aria-hidden="true"
+  viewBox="0 0 24 24"
+  className="size-4 text-zinc-500"
+  fill="none"
+  stroke="currentColor"
+  strokeLinecap="round"
+  strokeLinejoin="round"
+  strokeWidth="2"
+>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M12 7v5l3 2" />
+</svg>
+            </span>
             <span>{therapist.experience}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span>★</span>
-            <span>{therapist.rating}</span>
           </div>
         </div>
       );
@@ -297,25 +347,24 @@ function CategoryDetails({ therapist, categoryKey }: { therapist: Therapist; cat
       return (
         <div className="space-y-1">
           <div className="flex items-center gap-1.5">
-            <span>✓</span>
-            <span>{therapist.isVerified ? "Verified therapist" : "New therapist"}</span>
+            <span>
+              <svg
+  aria-hidden="true"
+  viewBox="0 0 24 24"
+  className="size-4 text-zinc-500"
+  fill="none"
+  stroke="currentColor"
+  strokeLinecap="round"
+  strokeLinejoin="round"
+  strokeWidth="2"
+>
+  <path d="M12 3 4 7v5c0 4.5 3.4 7.7 8 9 4.6-1.3 8-4.5 8-9V7l-8-4Z" />
+  <path d="M12 8v6" />
+  <path d="M9 11h6" />
+</svg>
+            </span>
+            <span>Joined {formatJoinedLabel(therapist.joinedAt)}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span>★</span>
-            <span>{therapist.rating} ({therapist.reviewCount} reviews)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span>📍</span>
-            <span>{therapist.location}</span>
-          </div>
-        </div>
-      );
-    default:
-      return (
-        <div className="flex flex-wrap items-center gap-2">
-          <span>{therapist.location}</span>
-          <span>·</span>
-          <span>★ {therapist.rating}</span>
         </div>
       );
   }
