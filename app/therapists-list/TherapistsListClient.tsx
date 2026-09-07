@@ -20,9 +20,9 @@ export default function TherapistsListClient({ therapists, initialLocation }: Pr
     const available = therapists; // will be filtered by category UI (Kumasi / Accra)
     return [
       { key: "available", title: "Available at Your Location", items: available },
-      { key: "top", title: "Top Rated", items: topRated },
-      { key: "specialists", title: "Specialists", items: specialists },
-      { key: "new", title: "New", items: newTherapists },
+      // { key: "top", title: "Top Rated", items: topRated },
+      // { key: "specialists", title: "Specialists", items: specialists },
+      // { key: "new", title: "Most Recent & Newest Therapists", items: newTherapists },
     ];
   }, [therapists]);
 
@@ -361,7 +361,7 @@ function TherapistCard({ therapist, categoryKey }: { therapist: Therapist; categ
                 onClick={() => setIsModalOpen(false)}
                 className="inline-flex items-center justify-center rounded-full bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
               >
-                Book now
+                Book {therapist.firstName}
               </Link>
             </div>
           </div>
