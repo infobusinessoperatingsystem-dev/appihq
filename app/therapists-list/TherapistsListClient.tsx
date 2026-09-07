@@ -20,9 +20,9 @@ export default function TherapistsListClient({ therapists, initialLocation }: Pr
     const available = therapists; // will be filtered by category UI (Kumasi / Accra)
     return [
       { key: "available", title: "Available at Your Location", items: available },
-      // { key: "top", title: "Top Rated", items: topRated },
-      // { key: "specialists", title: "Specialists", items: specialists },
-      // { key: "new", title: "Most Recent & Newest Therapists", items: newTherapists },
+      { key: "top", title: "Top Rated", items: topRated },
+      { key: "specialists", title: "Specialists", items: specialists },
+      { key: "new", title: "Most Recent & Newest Therapists", items: newTherapists },
     ];
   }, [therapists]);
 
@@ -42,6 +42,7 @@ export default function TherapistsListClient({ therapists, initialLocation }: Pr
 function CategorySection({ title, items, categoryKey }: { title: string; items: Therapist[]; categoryKey: string }) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const hasRestoredPositionRef = useRef(false);
 
   const filtersForCategory = useMemo(() => {
     switch (categoryKey) {
@@ -60,8 +61,8 @@ function CategorySection({ title, items, categoryKey }: { title: string; items: 
 
   const storageKey = `therapists.filter.${categoryKey}`;
   const [activeFilter, setActiveFilter] = useState<string>("All");
+  const positionKey = `therapists.position.${categoryKey}.${activeFilter}`;
   const hasLoadedRef = useRef(false);
-
   // Load persisted filter for this category on mount
   useEffect(() => {
     try {
@@ -104,12 +105,27 @@ function CategorySection({ title, items, categoryKey }: { title: string; items: 
     return items;
   }, [items, activeFilter, categoryKey]);
 
+  // Load persisted currentIndex/position for this category (or reset)
   useEffect(() => {
-    setCurrentIndex(0);
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({ left: 0, behavior: "auto" });
+    try {
+      const saved = localStorage.getItem(positionKey);
+      const idx = saved !== null && !Number.isNaN(Number(saved)) ? clampIndex(Number(saved)) : 0;
+      requestAnimationFrame(() => {
+        const container = scrollRef.current;
+        const cards = container?.querySelectorAll<HTMLElement>("[data-therapist-card]");
+        if (cards && cards.length) {
+          scrollToIndex(idx);
+          setCurrentIndex(idx);
+        }
+      });
+    } catch (e) {
+      // ignore
+    } finally {
+      hasRestoredPositionRef.current = true;
     }
-  }, [displayedItems]);
+  }, [displayedItems.length, activeFilter]);
+
+  
 
   const clampIndex = (nextIndex: number) => Math.min(Math.max(nextIndex, 0), Math.max(displayedItems.length - 1, 0));
 
@@ -122,10 +138,21 @@ function CategorySection({ title, items, categoryKey }: { title: string; items: 
 
     const firstCard = cards[0];
     const gap = 12;
-    const left = nextIndex * (firstCard.offsetWidth + gap);
+    const cardW = firstCard.offsetWidth + gap;
+    const cardLeft = nextIndex * cardW;
+    // center the card in the container
+    const containerWidth = container.clientWidth;
+    const left = Math.max(0, Math.min(cardLeft - (containerWidth - firstCard.offsetWidth) / 2, container.scrollWidth - containerWidth));
 
-    container.scrollTo({ left, behavior: "smooth" });
+    container.scrollTo({ left, behavior: hasRestoredPositionRef.current ? "smooth" : "auto" });
     setCurrentIndex(nextIndex);
+
+    // persist position
+    try {
+      localStorage.setItem(positionKey, String(nextIndex));
+    } catch (e) {
+      // ignore
+    }
   };
 
   const handleScroll = () => {
@@ -139,7 +166,14 @@ function CategorySection({ title, items, categoryKey }: { title: string; items: 
     const gap = 12;
     const cardWidth = firstCard.offsetWidth + gap;
     const nextIndex = Math.round(container.scrollLeft / cardWidth);
-    setCurrentIndex(clampIndex(nextIndex));
+    const clamped = clampIndex(nextIndex);
+    setCurrentIndex(clamped);
+    // persist live scroll position per active filter
+    try {
+      localStorage.setItem(positionKey, String(clamped));
+    } catch (e) {
+      // ignore
+    }
   };
 
   const maxIndex = Math.max(displayedItems.length - 1, 0);
@@ -231,7 +265,7 @@ function TherapistCard({ therapist, categoryKey }: { therapist: Therapist; categ
     <>
       <article
         data-therapist-card
-        className="group flex min-w-[275px] max-w-[295px] snap-start flex-1 flex-col overflow-hidden"
+        className="group snap-center flex-[0_0_85%] sm:flex-1 sm:min-w-[275px] sm:max-w-[295px] flex flex-col overflow-hidden"
       >
         <div className="relative block h-95 w-full overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shadow-sm transition-all duration-200 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
           <div className="absolute inset-x-0 top-0 z-20 flex items-center gap-1 p-2">
@@ -295,7 +329,7 @@ function TherapistCard({ therapist, categoryKey }: { therapist: Therapist; categ
           <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-4 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Therapist</p>
+                {/* <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Therapist</p> */}
                 <h4 className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
                   {therapist.firstName}, {therapist.age}
                 </h4>
