@@ -28,7 +28,7 @@ export default function TherapistsListClient({
     return [
       {
         key: "available",
-        title: "Available at Your Location",
+        title: "Available Therapists",
         items: available,
       },
       // { key: "top", title: "Top Rated", items: topRated },
@@ -60,7 +60,7 @@ export default function TherapistsListClient({
         </Link>
         <Link
           className="app-button app-button-secondary w-full md:w-60"
-          href="/subscribe"
+          href="/bookings"
         >
           Your Bookings
         </Link>

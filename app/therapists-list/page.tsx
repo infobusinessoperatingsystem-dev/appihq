@@ -36,8 +36,8 @@ export default function TherapistsListPage() {
           </Link>
 
           <Link
-            href="#"
-            aria-label="Back to Appi home"
+            href="/bookings"
+            aria-label="View your bookings"
             className="app-button app-button-brand"
           >
             Bookings

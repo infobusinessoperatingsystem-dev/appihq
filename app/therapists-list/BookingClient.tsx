@@ -7,14 +7,17 @@ import type {
   MassageOffering,
   TherapistAvailability,
   ServiceLocation,
+  WalkInLocation,
 } from "./therapists";
 import Image from "next/image";
+import { saveBooking, type SavedBooking } from "../booking-data";
 
 type Props = { therapist?: Therapist };
 
 const emptyOfferings: MassageOffering[] = [];
 const emptyAvailability: TherapistAvailability[] = [];
 const emptyServiceLocations: ServiceLocation[] = [];
+const emptyWalkInLocations: WalkInLocation[] = [];
 
 function pad(n: number) {
   return n.toString().padStart(2, "0");
@@ -89,16 +92,19 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
   const offerings = therapist?.massageOfferings ?? emptyOfferings;
   const availability = therapist?.availability ?? emptyAvailability;
   const serviceLocations = therapist?.serviceLocations ?? emptyServiceLocations;
+  const walkInLocations = therapist?.walkInLocations ?? emptyWalkInLocations;
 
   const [step, setStep] = useState(0);
   const [selectedOffering, setSelectedOffering] =
     useState<MassageOffering | null>(offerings[0] || null);
-  const [selectedLocation, setSelectedLocation] =
-    useState<ServiceLocation | null>(serviceLocations[0] || null);
+  const [selectedLocation, setSelectedLocation] = useState<ServiceLocation | null>(null);
+  const [locationDetails, setLocationDetails] = useState("");
+  const [selectedWalkInLocationId, setSelectedWalkInLocationId] = useState("");
   const [selectedDate, setSelectedDate] = useState<string | null>(
     availability[0]?.date || null,
   );
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [bookingError, setBookingError] = useState<string | null>(null);
   const [modalOffering, setModalOffering] = useState<MassageOffering | null>(
     null,
   );
@@ -120,6 +126,10 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
       selectedOffering.durationMinutes,
     );
   }, [selectedDate, selectedOffering, availability]);
+
+  const selectedWalkInLocation = walkInLocations.find(
+    (location) => location.id === selectedWalkInLocationId,
+  );
 
   const router = useRouter();
 
@@ -145,26 +155,57 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
       "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1000&q=80",
   };
 
+  function canProceedFromLocation() {
+    if (selectedLocation === "walk-in") return !!selectedWalkInLocation;
+    if (selectedLocation === "home" || selectedLocation === "hotel") {
+      return locationDetails.trim().length > 0;
+    }
+    return false;
+  }
+
+  function getLocationDetails() {
+    if (selectedLocation === "walk-in") {
+      return selectedWalkInLocation
+        ? `${selectedWalkInLocation.name} — ${selectedWalkInLocation.address}`
+        : "";
+    }
+    return locationDetails.trim();
+  }
+
   function canProceedToSummary() {
     return (
       !!selectedOffering &&
-      !!selectedLocation &&
+      canProceedFromLocation() &&
       !!selectedDate &&
       !!selectedTime
     );
   }
 
   function handleConfirm() {
-    if (!therapist || !selectedOffering || !selectedLocation || !selectedDate || !selectedTime) return;
+    if (!therapist || !selectedOffering || !selectedLocation || !selectedDate || !selectedTime || !canProceedFromLocation()) return;
 
-    const query = new URLSearchParams({
-      therapist: therapist.firstName,
+    const booking: SavedBooking = {
+      id: crypto.randomUUID(),
+      therapistSlug: therapist.slug,
+      therapistName: therapist.firstName,
       treatment: selectedOffering.massageType,
-      duration: String(selectedOffering.durationMinutes),
-      location: selectedLocation,
+      durationMinutes: selectedOffering.durationMinutes,
+      serviceLocation: selectedLocation,
+      locationDetails: getLocationDetails(),
       date: selectedDate,
       time: selectedTime,
-      price: String(selectedOffering.price),
+      price: selectedOffering.price,
+      createdAt: new Date().toISOString(),
+      demo: true,
+    };
+
+    if (!saveBooking(booking)) {
+      setBookingError("This browser could not save your booking. Check storage settings and try again.");
+      return;
+    }
+
+    const query = new URLSearchParams({
+      bookingId: booking.id,
     });
 
     router.push(`/booking-confirmation?${query.toString()}`);
@@ -264,8 +305,6 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
                   </p>
                 )}
                 {offerings.map((o) => {
-                  const img =
-                    massageTypeImages[o.massageType] || therapist.image;
                   return (
                     <div
                       key={o.massageType}
@@ -326,8 +365,12 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
                   <button
                     key={loc}
                     onClick={() => {
+                      if (selectedLocation !== loc) {
+                        setLocationDetails("");
+                        setSelectedWalkInLocationId("");
+                      }
                       setSelectedLocation(loc);
-                      setStep(2);
+                      setBookingError(null);
                     }}
                     aria-pressed={selectedLocation === loc}
                     className={`app-button min-h-14 w-full justify-between px-4 py-3 text-left text-sm capitalize transition-colors ${selectedLocation === loc ? "border-app-primary bg-app-surface-muted text-app-ink" : "border-app-border bg-app-surface text-app-ink hover:border-app-primary"}`}
@@ -337,6 +380,69 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
                   </button>
                 ))}
               </div>
+
+              {(selectedLocation === "home" || selectedLocation === "hotel") && (
+                <div className="mt-5 rounded-md border border-app-border bg-app-surface-muted p-4">
+                  <label htmlFor="service-location-details" className="mb-2 block text-sm font-semibold text-app-ink">
+                    {selectedLocation === "home" ? "Where should the therapist meet you?" : "Which hotel should the therapist visit?"}
+                  </label>
+                  <textarea
+                    id="service-location-details"
+                    rows={3}
+                    maxLength={300}
+                    required
+                    value={locationDetails}
+                    onChange={(event) => {
+                      setLocationDetails(event.target.value);
+                      setBookingError(null);
+                    }}
+                    placeholder={selectedLocation === "home"
+                      ? "Enter your house number, street, suburb, city, and a nearby landmark"
+                      : "Enter the hotel name, street address, and lobby or room details"}
+                    className="app-control w-full resize-y p-3 text-sm leading-6 placeholder:text-app-ink-muted/75 focus:outline-none focus:ring-2 focus:ring-app-focus"
+                  />
+                  {/* <p className="mt-2 text-xs leading-5 text-app-ink-muted">
+                    This address is saved with this booking on this device only.
+                  </p> */}
+                </div>
+              )}
+
+              {selectedLocation === "walk-in" && (
+                <div className="mt-5 space-y-3">
+                  <div>
+                    <h5 className="text-sm font-semibold text-app-ink">Choose a walk-in location</h5>
+                    <p className="mt-1 text-xs leading-5 text-app-ink-muted">
+                      Sample venues are shown for this demo. Confirm the venue with the therapist before travelling.
+                    </p>
+                  </div>
+                  {walkInLocations.length > 0 ? (
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {walkInLocations.map((location) => (
+                        <button
+                          key={location.id}
+                          type="button"
+                          aria-pressed={selectedWalkInLocationId === location.id}
+                          onClick={() => {
+                            setSelectedWalkInLocationId(location.id);
+                            setBookingError(null);
+                          }}
+                          className={`flex min-h-16 items-start justify-between gap-3 rounded-md border p-3 text-left transition-colors ${selectedWalkInLocationId === location.id ? "border-app-primary bg-app-surface-muted" : "border-app-border bg-app-surface hover:border-app-primary"}`}
+                        >
+                          <span>
+                            <span className="block text-sm font-medium text-app-ink">{location.name}</span>
+                            <span className="mt-1 block text-xs leading-5 text-app-ink-muted">{location.address}</span>
+                          </span>
+                          <span aria-hidden="true" className="text-app-primary">{selectedWalkInLocationId === location.id ? "✓" : "○"}</span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="rounded-md border border-app-border p-3 text-sm text-app-ink-muted">
+                      This therapist has not added a walk-in venue yet. Choose home or hotel instead.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -404,7 +510,7 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
               </button>
               {step < 3 && (
                 <button
-                  disabled={step === 2 && (!selectedDate || !selectedTime)}
+                  disabled={(step === 1 && !canProceedFromLocation()) || (step === 2 && (!selectedDate || !selectedTime))}
                   onClick={() => setStep((s) => Math.min(3, s + 1))}
                   className="app-button app-button-primary"
                 >
@@ -424,7 +530,8 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
                 </p>
                 <p className="py-3 text-sm">
                   <span className="font-medium">Location</span><br />
-                  {selectedLocation}
+                  <span className="capitalize">{selectedLocation}</span>
+                  <span className="block text-app-ink-muted">{getLocationDetails()}</span>
                 </p>
                 <p className="py-3 text-sm">
                   <span className="font-medium">Date and time</span><br />
@@ -454,6 +561,9 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
                   Change time
                 </button>
               </div>
+              {bookingError && (
+                <p role="alert" className="mt-3 text-sm text-red-700 dark:text-red-300">{bookingError}</p>
+              )}
             </div>
           )}
         </div>

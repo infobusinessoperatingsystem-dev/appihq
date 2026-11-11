@@ -12,6 +12,7 @@ export default function SiteFooter() {
         </div>
         <nav aria-label="Legal" className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
           <Link href="/about" className="app-link">About</Link>
+          <Link href="/bookings" className="app-link">Your bookings</Link>
           <Link href="/terms#clients" className="app-link">Client terms</Link>
           <Link href="/terms#therapists" className="app-link">Therapist terms</Link>
           <Link href="/terms#privacy" className="app-link">Privacy</Link>
