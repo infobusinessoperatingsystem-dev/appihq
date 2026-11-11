@@ -11,6 +11,7 @@ export default function SiteFooter() {
           <p className="mt-1 text-xs">Massage care, made more personal.</p>
         </div>
         <nav aria-label="Legal" className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+          <Link href="/about" className="transition hover:text-zinc-950 dark:hover:text-white">About</Link>
           <Link href="/terms#clients" className="transition hover:text-zinc-950 dark:hover:text-white">Client terms</Link>
           <Link href="/terms#therapists" className="transition hover:text-zinc-950 dark:hover:text-white">Therapist terms</Link>
           <Link href="/terms#privacy" className="transition hover:text-zinc-950 dark:hover:text-white">Privacy</Link>
