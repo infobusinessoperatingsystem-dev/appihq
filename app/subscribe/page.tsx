@@ -66,13 +66,13 @@ function BenefitIcon({ name }: { name: string }) {
 
 export default function SubscribePage() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f4f0e8] text-[#20211d dark:bg-black">
-      <header className="border-b border-[#20211d]/10">
+    <main className="app-page min-h-screen overflow-hidden">
+      <header className="border-b border-app-border bg-app-surface">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
-          <Link href="/" className="text-xl font-semibold tracking-tight" aria-label="Back to Appi home">
+          <Link href="/" className="app-link text-xl font-semibold tracking-tight" aria-label="Back to Appi home">
             <span className="italic">App</span>i
           </Link>
-          <Link href="/therapists-list" className="inline-flex items-center gap-2 text-sm font-medium text-[#20211d]/70 transition hover:text-[#20211d]">
+          <Link href="/therapists-list" className="app-link inline-flex items-center gap-2 text-sm font-medium">
             Browse therapists
             <span aria-hidden="true">&#8599;</span>
           </Link>
@@ -105,31 +105,31 @@ export default function SubscribePage() {
           </div> */}
         </section>
 
-        <aside id="payment" className="relative rounded-sm bg-[#20211d] p-6 text-[#f9f7f1] shadow-[0_24px_60px_rgba(32,33,29,0.18)] sm:p-8">
-          <div className="mt-2 flex items-end justify-center gap-2 border-b border-[#f9f7f1]/15 pb-7">
+        <aside id="payment" className="relative rounded-md bg-app-brand p-6 text-white shadow-xl sm:p-8">
+          <div className="mt-2 flex items-end justify-center gap-2 border-b border-white/20 pb-7">
             <span className="text-5xl font-semibold tracking-[-0.04em]">GHS 750</span>
-            <span className="mb-2 text-sm text-[#f9f7f1]/55">/ month</span>
+            <span className="mb-2 text-sm text-white/65">/ year</span>
           </div>
 
           <div className="space-y-4 py-7 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[#f9f7f1]/60">Membership</span>
+              <span className="text-white/65">Membership</span>
               <span>GHS 750</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[#f9f7f1]/60">Billing</span>
+              <span className="text-white/65">Billing</span>
               <span>Once yearly</span>
             </div>
-            <div className="flex items-center justify-between border-t border-[#f9f7f1]/15 pt-4 font-semibold">
+            <div className="flex items-center justify-between border-t border-white/20 pt-4 font-semibold">
               <span>Total today</span>
               <span>GHS 750</span>
             </div>
           </div>
 
-          <Link href="/therapists-list" className="flex h-13 w-full items-center justify-center rounded-sm bg-[#e7a45a] px-5 text-sm font-semibold text-[#20211d] transition hover:bg-[#f0b875] focus:outline-none focus:ring-2 focus:ring-[#e7a45a] focus:ring-offset-2 focus:ring-offset-[#20211d]">
+          <Link href="/therapists-list" className="app-button app-button-primary w-full">
             Start your membership
           </Link>
-          <p className="mt-2 text-center text-xs leading-5 text-[#f9f7f1]/45">No name or phone number required.</p>
+          <p className="mt-2 text-center text-xs leading-5 text-white/65">No name or phone number required.</p>
         </aside>
       </div>
 

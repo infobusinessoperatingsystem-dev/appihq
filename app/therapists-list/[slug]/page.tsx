@@ -47,10 +47,10 @@ export default async function TherapistProfilePage({
   }
 
   return (
-    <main className="min-h-screen bg-[#f8f3ee] font-sans text-zinc-950 dark:bg-black dark:text-zinc-50">
+    <main className="app-page min-h-screen font-sans">
       <section className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 py-6 sm:max-w-lg">
 
-        <article className="overflow-hidden rounded-lg bg-white shadow-2xl shadow-zinc-900/10 dark:bg-zinc-950 dark:shadow-black">
+        <article className="app-surface overflow-hidden rounded-md shadow-xl">
           <div className="relative aspect-[4/3.55] overflow-hidden bg-zinc-200 dark:bg-zinc-900">
             <Image
               src={therapist.image}
@@ -64,7 +64,7 @@ export default async function TherapistProfilePage({
               <Link
                 href="/therapists-list"
                 aria-label="Back to therapist list"
-                className="inline-flex size-10 items-center justify-center rounded-full bg-black/20 text-white ring-1 ring-white/25 backdrop-blur transition hover:bg-black/35 focus:outline-none focus:ring-2 focus:ring-white"
+                className="app-icon-button-overlay"
               >
                 <svg
                   aria-hidden="true"
@@ -91,7 +91,7 @@ export default async function TherapistProfilePage({
             </div>
           </div>
 
-          <div className="-mt-5 rounded-t-lg bg-white px-5 pb-5 pt-6 dark:bg-zinc-950">
+          <div className="-mt-5 rounded-t-md bg-app-surface px-5 pb-5 pt-6">
             <section aria-labelledby="profile-name">
               <h2
                 id="profile-name"
@@ -102,7 +102,7 @@ export default async function TherapistProfilePage({
 
               <div className="mt-3 flex flex-col gap-3 text-sm text-zinc-700 dark:text-zinc-300">
                 <div className="flex items-center gap-2">
-                  <span className="text-amber-400" aria-hidden="true">
+                  <span className="text-app-accent" aria-hidden="true">
                     ★
                   </span>
                   <span>
@@ -113,7 +113,7 @@ export default async function TherapistProfilePage({
                   <svg
                     aria-hidden="true"
                     viewBox="0 0 24 24"
-                    className="size-4 text-emerald-600"
+                    className="size-4 text-app-success"
                     fill="currentColor"
                   >
                     <path d="M12 2 4.5 5.2v5.7c0 4.7 3.2 9.1 7.5 10.1 4.3-1 7.5-5.4 7.5-10.1V5.2L12 2Zm3.5 8.4-4.2 4.2-2.1-2.1 1.1-1.1 1 1 3.1-3.1 1.1 1.1Z" />
@@ -147,7 +147,7 @@ export default async function TherapistProfilePage({
                 {therapist.specialties.map((specialty) => (
                   <span
                     key={specialty}
-                    className="rounded-lg bg-[#fbf7f3] px-3 py-2 text-xs font-semibold text-zinc-800 dark:bg-black dark:text-zinc-200"
+                    className="rounded-md bg-app-surface-muted px-3 py-2 text-xs font-semibold text-app-ink"
                   >
                     {specialty}
                   </span>
@@ -156,11 +156,11 @@ export default async function TherapistProfilePage({
             </section>
 
             <section className="mt-5" aria-label="Visit location options">
-              <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-black">
+              <div className="grid grid-cols-3 overflow-hidden rounded-md border border-app-border bg-app-surface shadow-sm">
                 {therapist.visitTypes.map((visitType) => (
                   <div
                     key={visitType}
-                    className="flex items-center justify-center gap-2 border-r border-zinc-200 px-2 py-4 text-xs font-semibold last:border-r-0 dark:border-zinc-800"
+                    className="flex items-center justify-center gap-2 border-r border-app-border px-2 py-4 text-xs font-semibold last:border-r-0"
                   >
                     <VisitTypeIcon visitType={visitType} />
                     <span>{visitType}</span>
@@ -186,7 +186,7 @@ export default async function TherapistProfilePage({
                 {therapist.gallery.map((image, index) => (
                   <div
                     key={image}
-                    className="relative aspect-[4/3] overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900"
+                    className="relative aspect-4/3 overflow-hidden rounded-md bg-app-surface-muted"
                   >
                     <Image
                       src={image}
@@ -207,13 +207,13 @@ export default async function TherapistProfilePage({
               <div className="mt-3 space-y-4">
                 {therapist.reviews && therapist.reviews.length > 0 ? (
                   therapist.reviews.map((r, i) => (
-                    <div key={i} className="rounded-lg border border-zinc-100 p-3 dark:border-zinc-800">
+                    <div key={i} className="rounded-md border border-app-border p-3">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">{r.author}</p>
                           {r.date && <p className="text-xs text-zinc-500">{r.date}</p>}
                         </div>
-                        <div className="text-amber-400 font-semibold">★ {r.rating}</div>
+                        <div className="font-semibold text-app-accent">★ {r.rating}</div>
                       </div>
                       <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{r.text}</p>
                     </div>
@@ -225,7 +225,7 @@ export default async function TherapistProfilePage({
             </section>
           </div>
 
-          <footer className="sticky bottom-0 grid grid-cols-[1fr_auto] items-center gap-4 border-t border-zinc-100 bg-white/95 px-5 py-4 backdrop-blur dark:border-zinc-900 dark:bg-zinc-950/95">
+          <footer className="sticky bottom-0 grid grid-cols-[1fr_auto] items-center gap-4 border-t border-app-border bg-app-surface/95 px-5 py-4 backdrop-blur">
             <div>
               <p className="text-xl font-semibold tracking-tight">
                 {therapist.price}

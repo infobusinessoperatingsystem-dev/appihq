@@ -39,7 +39,7 @@ export default function FavoriteButton({ therapistName }: FavoriteButtonProps) {
         aria-label={`Save ${therapistName} as a favorite`}
         aria-pressed="false"
         onClick={handleFavoriteClick}
-        className="inline-flex size-10 items-center justify-center rounded-full bg-white/95 text-zinc-950 shadow-sm ring-1 ring-black/10 transition hover:bg-white hover:scale-105 focus:outline-none focus:ring-2 focus:ring-black dark:bg-black/85 dark:text-zinc-50 dark:ring-white/15 dark:hover:bg-black dark:focus:ring-white"
+        className="app-icon-button-overlay"
       >
         <svg
           aria-hidden="true"
@@ -59,7 +59,7 @@ export default function FavoriteButton({ therapistName }: FavoriteButtonProps) {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-5 left-1/2 z-50 w-[min(calc(100vw-2rem),24rem)] -translate-x-1/2 rounded-lg bg-zinc-950 px-4 py-3 text-center text-sm font-medium text-white shadow-lg dark:bg-white dark:text-zinc-950"
+          className="fixed bottom-5 left-1/2 z-50 w-[min(calc(100vw-2rem),24rem)] -translate-x-1/2 rounded-md bg-app-brand px-4 py-3 text-center text-sm font-medium text-white shadow-lg"
         >
           Sign in will be needed to save favorites.
         </div>

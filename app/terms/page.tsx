@@ -21,21 +21,21 @@ const sections = [
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-[#f7f5ef] text-zinc-900 dark:bg-black dark:text-zinc-100">
-      <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+    <main className="app-page min-h-screen">
+      <header className="border-b border-app-border bg-app-surface">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
-          <Link href="/" className="text-xl font-semibold tracking-tight"><span className="italic">App</span>i</Link>
-          <Link href="/therapists-list" className="text-sm font-medium text-zinc-600 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white">Browse therapists</Link>
+          <Link href="/" className="app-link text-xl font-semibold tracking-tight"><span className="italic">App</span>i</Link>
+          <Link href="/therapists-list" className="app-link text-sm font-medium">Browse therapists</Link>
         </div>
       </header>
 
       <div className="mx-auto grid max-w-6xl gap-12 px-5 py-10 sm:px-8 sm:py-16 lg:grid-cols-[230px_minmax(0,1fr)]">
         <aside className="self-start lg:sticky lg:top-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800 dark:text-emerald-300">Legal</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-primary">Legal</p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight">Terms of service</h1>
           <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400">Effective 11 November 2026</p>
           <nav aria-label="Terms sections" className="mt-7 flex flex-wrap gap-x-4 gap-y-2 text-sm lg:flex-col">
-            {sections.map((section) => <a key={section.id} href={`#${section.id}`} className="text-zinc-600 underline-offset-4 hover:text-zinc-950 hover:underline dark:text-zinc-400 dark:hover:text-white">{section.title.replace(/^\d+\. /, "")}</a>)}
+            {sections.map((section) => <a key={section.id} href={`#${section.id}`} className="app-link">{section.title.replace(/^\d+\. /, "")}</a>)}
           </nav>
         </aside>
 
@@ -44,7 +44,7 @@ export default function TermsPage() {
             <p className="text-lg leading-8">These Terms of Service explain the arrangements between Appihq, which operates the Appi platform (“Appi”, “we”, “us” or the “Business”), people who use Appi to find massage care (“Clients”), and independent massage therapists who present or offer their services through Appi (“Therapists”). They apply when you visit Appi, create or use an account, publish a therapist profile, contact another user, or request, accept or manage a massage booking through the platform.</p>
             <p className="mt-4">Appi is being developed incrementally. At this stage, Appi is focused on massage therapists and massage services only. Other professions or service categories that may be part of Appi’s longer-term vision are not currently offered through the platform and are not covered as available services by these Terms. If Appi introduces another category, it will explain the applicable service and update these Terms before that category becomes available.</p>
             <p className="mt-4">By using Appi, you agree to the terms that apply to your role. If you do not agree, do not use the relevant Appi service. “You” refers to the person using Appi as a Client or Therapist. These Terms govern your use of the Appi platform; the massage service itself is arranged directly between the Client and the independent Therapist, as described below.</p>
-            <div className="mt-5 border-l-2 border-amber-600 pl-4 text-sm leading-6 text-zinc-600 dark:text-zinc-400">This page is a plain-language product draft and is not legal advice. Before launch, Appihq should confirm its registered legal name, address, contact details, fees, refund rules, privacy practices, licensing obligations and dispute process with a Ghana-qualified lawyer. Do not rely on a booking or payment feature until Appi explicitly confirms it is available.</div>
+            <div className="mt-5 border-l-2 border-app-accent pl-4 text-sm leading-6 text-app-ink-muted">This page is a plain-language product draft and is not legal advice. Before launch, Appihq should confirm its registered legal name, address, contact details, fees, refund rules, privacy practices, licensing obligations and dispute process with a Ghana-qualified lawyer. Do not rely on a booking or payment feature until Appi explicitly confirms it is available.</div>
           </section>
 
           <section id="clients" className="scroll-mt-8">

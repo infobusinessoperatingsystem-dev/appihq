@@ -13,13 +13,13 @@ export const metadata: Metadata = {
 
 export default function TherapistsListPage() {
   return (
-    <main className="min-h-screen bg-zinc-50 font-sans text-zinc-950 dark:bg-black dark:text-zinc-50">
-      <header className="border-b border-zinc-200 bg-white dark:border-zinc-900 dark:bg-black">
+    <main className="app-page min-h-screen font-sans">
+    <header className="border-b border-app-border bg-app-surface">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
           <Link
             href="/"
             aria-label="Back to Appi home"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-transparent text-sm font-medium text-foreground transition-colors hover:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-black dark:hover:text-zinc-300 dark:focus:ring-white"
+            className="app-icon-button border-0 bg-transparent"
           >
             <svg
               aria-hidden="true"
@@ -38,7 +38,7 @@ export default function TherapistsListPage() {
           <Link
             href="#"
             aria-label="Back to Appi home"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-black dark:hover:bg-zinc-200 dark:focus:ring-white"
+            className="app-button app-button-brand"
           >
             Bookings
             {/* <span>

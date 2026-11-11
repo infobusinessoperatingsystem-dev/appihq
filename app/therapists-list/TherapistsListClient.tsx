@@ -51,12 +51,18 @@ export default function TherapistsListClient({
           />
         ))}
       </div>
-      <div className="mt-5 flex items-center justify-between gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+      <div className="mt-5 flex flex-col md:flex-row items-center justify-between gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
         <Link
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-sm bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-59.5"
+          className="app-button app-button-primary w-full md:w-60"
           href="/subscribe"
         >
-          See More
+          See More Therapists
+        </Link>
+        <Link
+          className="app-button app-button-secondary w-full md:w-60"
+          href="/subscribe"
+        >
+          Your Bookings
         </Link>
       </div>
     </section>
@@ -97,15 +103,19 @@ function CategorySection({
   const hasLoadedRef = useRef(false);
   // Load persisted filter for this category on mount
   useEffect(() => {
+    let frame: number | undefined;
     try {
       const saved = localStorage.getItem(storageKey);
       if (saved && filtersForCategory.includes(saved)) {
-        setActiveFilter(saved);
+        frame = requestAnimationFrame(() => setActiveFilter(saved));
       }
     } catch (e) {
       // ignore
     }
     hasLoadedRef.current = true;
+    return () => {
+      if (frame !== undefined) cancelAnimationFrame(frame);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -145,28 +155,47 @@ function CategorySection({
 
   // Load persisted currentIndex/position for this category (or reset)
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(positionKey);
-      const idx =
-        saved !== null && !Number.isNaN(Number(saved))
-          ? clampIndex(Number(saved))
-          : 0;
-      requestAnimationFrame(() => {
-        const container = scrollRef.current;
-        const cards = container?.querySelectorAll<HTMLElement>(
-          "[data-therapist-card]",
-        );
-        if (cards && cards.length) {
-          scrollToIndex(idx);
-          setCurrentIndex(idx);
+    const frame = requestAnimationFrame(() => {
+      const container = scrollRef.current;
+      const cards = container?.querySelectorAll<HTMLElement>(
+        "[data-therapist-card]",
+      );
+      if (!container || !cards?.length) {
+        hasRestoredPositionRef.current = true;
+        return;
+      }
+
+      let savedIndex = 0;
+      try {
+        const saved = localStorage.getItem(positionKey);
+        if (saved !== null && !Number.isNaN(Number(saved))) {
+          savedIndex = Number(saved);
         }
-      });
-    } catch (e) {
-      // ignore
-    } finally {
+      } catch (e) {
+        // ignore
+      }
+
+      const index = Math.min(
+        Math.max(savedIndex, 0),
+        Math.max(displayedItems.length - 1, 0),
+      );
+      const cardWidth = cards[0].offsetWidth;
+      const cardLeft = index * (cardWidth + 12);
+      const left = Math.max(
+        0,
+        Math.min(
+          cardLeft - (container.clientWidth - cardWidth) / 2,
+          container.scrollWidth - container.clientWidth,
+        ),
+      );
+
+      container.scrollTo({ left, behavior: "auto" });
+      setCurrentIndex(index);
       hasRestoredPositionRef.current = true;
-    }
-  }, [displayedItems.length, activeFilter]);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [displayedItems.length, positionKey]);
 
   const clampIndex = (nextIndex: number) =>
     Math.min(Math.max(nextIndex, 0), Math.max(displayedItems.length - 1, 0));
@@ -245,26 +274,18 @@ function CategorySection({
           <button
             onClick={() => scrollToIndex(clampIndex(currentIndex - 1))}
             disabled={!canGoPrev}
-            className={`inline-flex h-8 w-8 items-center justify-center rounded-full border text-lg transition disabled:cursor-not-allowed disabled:opacity-40 ${
-              !canGoPrev
-                ? "border-zinc-200 bg-zinc-50 text-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-600"
-                : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
-            }`}
+            className="app-icon-button disabled:cursor-not-allowed disabled:opacity-40"
             aria-label={`Previous ${title}`}
           >
-            ‹
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
           </button>
           <button
             onClick={() => scrollToIndex(clampIndex(currentIndex + 1))}
             disabled={!canGoNext}
-            className={`inline-flex h-8 w-8 items-center justify-center rounded-full border text-lg transition disabled:cursor-not-allowed disabled:opacity-40 ${
-              !canGoNext
-                ? "border-zinc-200 bg-zinc-50 text-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-600"
-                : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
-            }`}
+            className="app-icon-button disabled:cursor-not-allowed disabled:opacity-40"
             aria-label={`Next ${title}`}
           >
-            ›
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
           </button>
         </div>
       </div>
@@ -295,7 +316,7 @@ function CategorySection({
           <div
             ref={scrollRef}
             onScroll={handleScroll}
-            className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] [scroll-behavior:smooth] [&::-webkit-scrollbar]:hidden"
+            className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 scrollbar-none [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] scroll-smooth [&::-webkit-scrollbar]:hidden"
           >
             {displayedItems.map((therapist) => (
               <TherapistCard
@@ -339,9 +360,9 @@ function TherapistCard({
     <>
       <article
         data-therapist-card
-        className="group snap-center flex-[0_0_85%] sm:flex-1 sm:min-w-[275px] sm:max-w-[295px] flex flex-col overflow-hidden"
+        className="group flex flex-[0_0_85%] flex-col snap-center overflow-hidden sm:min-w-68.75 sm:max-w-73.75 sm:flex-1"
       >
-        <div className="relative block h-95 w-full overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shadow-sm transition-all duration-200 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="relative block h-112 w-full overflow-hidden rounded-xl border border-app-border bg-app-surface-muted shadow-sm transition-all duration-200 hover:shadow-md">
           <div className="absolute inset-x-0 top-0 z-20 flex items-center gap-1 p-2">
             {imageList.map((_, index) => (
               <span
@@ -372,7 +393,7 @@ function TherapistCard({
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/15 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/95 via-black/15 to-transparent" />
 
           <button
             type="button"
@@ -390,12 +411,26 @@ function TherapistCard({
             </div>
           </button>
 
-          <div className="absolute top-3 right-2 z-30">
+          <div className="absolute bottom-3 right-2 z-30">
             <Link
               href={`/therapists-list/${therapist.slug}/book`}
-              className="inline-flex items-center justify-center rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium text-zinc-900 shadow-sm ring-1 ring-black/10 transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-black dark:bg-black/85 dark:text-zinc-50 dark:ring-white/15 dark:hover:bg-black dark:focus:ring-white"
+              className="app-button app-button-primary min-h-9 gap-2 rounded-md px-3.5 py-2 text-xs shadow-md"
             >
-              Book {therapist.firstName}
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="size-4 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.8"
+              >
+                <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
+                <path d="M7.5 3.5v3M16.5 3.5v3M3.5 9.5h17M8 14h3m-1.5-1.5v3" />
+              </svg>
+              Book 
+              {/* {therapist.firstName} */}
             </Link>
           </div>
         </div>
@@ -403,7 +438,7 @@ function TherapistCard({
 
       {isModalOpen ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 p-3 sm:items-center">
-          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-4 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950">
+          <div className="app-surface max-h-[90vh] w-full max-w-md overflow-y-auto rounded-md p-4 shadow-2xl">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
                 {/* <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Therapist</p> */}
@@ -415,7 +450,7 @@ function TherapistCard({
                 type="button"
                 aria-label="Close therapist details"
                 onClick={() => setIsModalOpen(false)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 text-lg text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                className="app-icon-button"
               >
                 ×
               </button>
@@ -472,7 +507,7 @@ function TherapistCard({
                     .map((review, index) => (
                       <div
                         key={`${therapist.slug}-review-${index}`}
-                        className="rounded-lg bg-zinc-50 p-2 dark:bg-zinc-900"
+                        className="rounded-md bg-app-surface-muted p-2"
                       >
                         <div className="mb-1 flex items-center justify-between text-xs">
                           <span className="font-medium text-zinc-900 dark:text-zinc-50">
@@ -501,7 +536,7 @@ function TherapistCard({
               <Link
                 href={`/therapists-list/${therapist.slug}/book`}
                 onClick={() => setIsModalOpen(false)}
-                className="inline-flex items-center justify-center rounded-full bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+                className="app-button app-button-primary"
               >
                 Book {therapist.firstName}
               </Link>

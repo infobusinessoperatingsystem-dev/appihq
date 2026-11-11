@@ -1,26 +1,272 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --app-canvas: #f7f5ef;
+  --app-surface: #ffffff;
+  --app-surface-muted: #eeeaf8;
+  --app-ink: #21154f;
+  --app-ink-muted: #716d7b;
+  --app-brand: #21154f;
+  --app-primary: #30235e;
+  --app-primary-hover: #21154f;
+  --app-accent: #f5a20b;
+  --app-accent-hover: #ffb82e;
+  --app-accent-ink: #21154f;
+  --app-border: #e2deea;
+  --app-success: #2f6848;
+  --app-focus: #6949c8;
+  --background: var(--app-canvas);
+  --foreground: var(--app-ink);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-app-canvas: var(--app-canvas);
+  --color-app-surface: var(--app-surface);
+  --color-app-surface-muted: var(--app-surface-muted);
+  --color-app-ink: var(--app-ink);
+  --color-app-ink-muted: var(--app-ink-muted);
+  --color-app-brand: var(--app-brand);
+  --color-app-primary: var(--app-primary);
+  --color-app-primary-hover: var(--app-primary-hover);
+  --color-app-accent: var(--app-accent);
+  --color-app-accent-hover: var(--app-accent-hover);
+  --color-app-accent-ink: var(--app-accent-ink);
+  --color-app-border: var(--app-border);
+  --color-app-success: var(--app-success);
+  --color-app-focus: var(--app-focus);
+  --color-zinc-50: #faf9fc;
+  --color-zinc-100: #f1eff6;
+  --color-zinc-200: #e2deea;
+  --color-zinc-300: #d1cadb;
+  --color-zinc-400: #b6afc3;
+  --color-zinc-500: #817b8d;
+  --color-zinc-600: #696374;
+  --color-zinc-700: #514b5d;
+  --color-zinc-800: #383244;
+  --color-zinc-900: #251f32;
+  --color-zinc-950: #15131d;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: dark;
+    --app-canvas: #15131d;
+    --app-surface: #1d1a28;
+    --app-surface-muted: #29243a;
+    --app-ink: #f5f1ff;
+    --app-ink-muted: #b6afc3;
+    --app-primary: #c9b9ff;
+    --app-primary-hover: #dfd5ff;
+    --app-accent: #ffbd3e;
+    --app-accent-hover: #ffd078;
+    --app-accent-ink: #21154f;
+    --app-border: #3a3547;
+    --app-success: #8bc8a0;
+    --app-focus: #c9b9ff;
+    --background: var(--app-canvas);
+    --foreground: var(--app-ink);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+.app-page {
+  min-height: 100vh;
+  background: var(--app-canvas);
+  color: var(--app-ink);
+}
+
+.app-surface {
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-ink);
+}
+
+.app-button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  padding: 0.625rem 1rem;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  text-align: center;
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.app-button:focus-visible,
+.app-icon-button:focus-visible,
+.app-link:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 3px;
+}
+
+.app-button-primary {
+  background: var(--app-accent);
+  color: var(--app-accent-ink);
+}
+
+.app-button-primary:hover {
+  background: var(--app-accent-hover);
+  transform: translateY(-1px);
+}
+
+.app-button-brand {
+  background: var(--app-primary);
+  color: var(--app-surface);
+}
+
+.app-button-brand:hover {
+  background: var(--app-primary-hover);
+  transform: translateY(-1px);
+}
+
+.app-button-secondary {
+  border-color: var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-primary);
+}
+
+.app-button-secondary:hover {
+  border-color: var(--app-primary);
+  background: var(--app-surface-muted);
+}
+
+.app-button-quiet {
+  background: transparent;
+  color: var(--app-primary);
+}
+
+.app-button-quiet:hover {
+  background: var(--app-surface-muted);
+}
+
+.app-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+}
+
+.app-icon-button {
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--app-border);
+  border-radius: 9999px;
+  background: var(--app-surface);
+  color: var(--app-primary);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.app-icon-button:hover {
+  border-color: var(--app-primary);
+  background: var(--app-surface-muted);
+}
+
+.app-icon-button-overlay {
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: 9999px;
+  background: rgb(33 21 79 / 40%);
+  color: white;
+  backdrop-filter: blur(8px);
+  transition: background-color 160ms ease;
+}
+
+.app-icon-button-overlay:hover {
+  background: rgb(33 21 79 / 70%);
+}
+
+.app-icon-button svg,
+.app-icon-button-overlay svg,
+.app-button svg {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+.app-link {
+  color: var(--app-primary);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.2em;
+  transition:
+    color 160ms ease,
+    text-decoration-color 160ms ease;
+}
+
+.app-link:hover {
+  color: var(--app-primary-hover);
+  text-decoration-color: currentColor;
+}
+
+.app-control {
+  min-height: 2.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.375rem;
+  background: var(--app-surface);
+  color: var(--app-ink);
+}
+
+.app-control-select {
+  width: 100%;
+  appearance: none;
+  padding: 0 2.75rem 0 0.875rem;
+  cursor: pointer;
+}
+
+.app-control option {
+  background: var(--app-surface);
+  color: var(--app-ink);
+}
+
+.app-select-wrap {
+  position: relative;
+}
+
+.app-select-chevron {
+  position: absolute;
+  top: 50%;
+  right: 0.875rem;
+  width: 1rem;
+  height: 1rem;
+  color: var(--app-ink-muted);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.app-control:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
 }
