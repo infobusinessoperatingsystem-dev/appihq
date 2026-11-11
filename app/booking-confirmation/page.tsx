@@ -57,12 +57,12 @@ export default async function BookingConfirmationPage({
           Back to therapists
         </Link> */}
 
-        <section className="app-surface mt-6 rounded-md p-6 shadow-sm sm:p-10">
-          <div className="mx-auto flex size-26 items-center justify-center rounded-full bg-app-surface-muted text-app-success">
+        <section className="confirmation-panel app-surface mt-6 rounded-md p-6 shadow-sm sm:p-10">
+          <div className="confirmation-mark mx-auto flex size-26 items-center justify-center rounded-full bg-app-surface-muted text-app-success">
             <svg
               aria-hidden="true"
               viewBox="0 0 24 24"
-              className="size-16"
+              className="confirmation-check size-16"
               fill="none"
               stroke="currentColor"
               strokeLinecap="round"

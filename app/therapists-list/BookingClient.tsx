@@ -281,7 +281,7 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
                         aria-pressed={selectedOffering?.massageType === o.massageType}
                         className="flex min-w-0 flex-1 items-center gap-3 border-0 bg-transparent p-0 text-left text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-focus"
                       >
-                        <span className="relative h-16 w-20 shrink-0 overflow-hidden rounded-md sm:h-18 sm:w-24">
+                        {/* <span className="relative h-16 w-20 shrink-0 overflow-hidden rounded-md sm:h-18 sm:w-24">
                           <Image
                             src={img}
                             alt={o.massageType}
@@ -289,7 +289,7 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
                             sizes="6rem"
                             className="object-cover"
                           />
-                        </span>
+                        </span> */}
                         <span className="min-w-0 flex-1">
                           <span className="block font-medium">{o.massageType}</span>
                           <span className="mt-1 block text-xs text-app-ink-muted">
