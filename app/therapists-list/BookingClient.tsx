@@ -394,7 +394,7 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
             </div>
           )}
 
-          {step !== 0 && (
+          {step > 0 && step < 3 && (
             <div className="flex flex-col-reverse gap-3 border-t border-app-border pt-5 sm:flex-row sm:items-center sm:justify-between">
               <button
                 onClick={() => setStep((s) => Math.max(0, s - 1))}
