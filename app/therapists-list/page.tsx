@@ -38,7 +38,7 @@ export default function TherapistsListPage() {
         </div>
       </header>
 
-      <TherapistsListClient therapists={therapists} initialLocation="New York, NY" />
+      <TherapistsListClient therapists={therapists} initialLocation="Ghana, GH" />
     </main>
   );
 }

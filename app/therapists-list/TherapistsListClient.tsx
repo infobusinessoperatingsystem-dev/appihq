@@ -29,7 +29,7 @@ export default function TherapistsListClient({
     return [
       {
         key: "available",
-        title: "Available Therapists",
+        title: "Therapists Available",
         items: available,
       },
       // { key: "top", title: "Top Rated", items: topRated },
@@ -402,7 +402,8 @@ function TherapistCard({
             className="absolute inset-x-0 bottom-0 z-20 w-full p-4 pb-3 text-left"
           >
             <div className="mb-1.5 text-[1.05rem] font-semibold tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)]">
-              {therapist.firstName}, {therapist.age}
+              {therapist.firstName}
+              {/* , {therapist.age} */}
             </div>
             <div className="text-[11px] leading-5 text-white/95 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
               <CategoryDetails
