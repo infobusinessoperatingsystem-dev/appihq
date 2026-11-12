@@ -52,7 +52,7 @@ export default function TherapistsListClient({
           />
         ))}
       </div>
-      <div className="mt-5 flex flex-col md:flex-row items-center justify-between gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+      {/* <div className="mt-5 flex flex-col md:flex-row items-center justify-between gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
         <Link
           className="app-button app-button-primary w-full md:w-60"
           href="/subscribe"
@@ -65,7 +65,7 @@ export default function TherapistsListClient({
         >
           Your Bookings
         </Link>
-      </div>
+      </div> */}
     </section>
   );
 }
@@ -361,7 +361,7 @@ function TherapistCard({
     <>
       <article
         data-therapist-card
-        className="group flex flex-[0_0_85%] flex-col snap-center overflow-hidden sm:min-w-68.75 sm:max-w-73.75 sm:flex-1"
+        className="group flex flex-[0_0_92%] flex-col snap-center overflow-hidden sm:min-w-68.75 sm:max-w-73.75 sm:flex-1"
       >
         <div className="relative block h-112 w-full overflow-hidden rounded-xl border border-app-border bg-app-surface-muted shadow-sm transition-all duration-200 hover:shadow-md">
           <div className="absolute inset-x-0 top-0 z-20 flex items-center gap-1 p-2">

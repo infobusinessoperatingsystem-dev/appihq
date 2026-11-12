@@ -43,12 +43,12 @@ export default function BookingConfirmationClient({ bookingId }: { bookingId?: s
       </div>
 
       <h1 className="mt-5 text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-        {booking ? "Booking summary" : "Booking not found"}
+        {booking ? "Booking confirmed" : "Booking not found"}
       </h1>
 
       {booking ? (
         <>
-          <p className="mt-2 text-center text-app-ink-muted">Your selected massage details are saved on this device.</p>
+          <p className="mt-2 text-center text-app-ink-muted">Your therapist will contact you shortly before your scheduled appointment.<br /> Have a great session ahead!</p>
           <dl className="mt-7 divide-y divide-app-border rounded-md border border-app-border px-4">
             <div className="flex flex-wrap justify-between gap-2 py-3 text-sm">
               <dt className="text-app-ink-muted">Therapist</dt>
@@ -75,20 +75,16 @@ export default function BookingConfirmationClient({ bookingId }: { bookingId?: s
               <dd className="text-base font-semibold">{formatGhs(booking.price)}</dd>
             </div>
           </dl>
-
-          <p className="mt-5 rounded-md bg-app-surface-muted p-3 text-sm leading-6 text-app-ink-muted">
-            Demo booking: this summary is saved only in this browser. It has not been sent to the therapist.
-          </p>
         </>
       ) : (
         <p className="mt-3 text-center leading-7 text-app-ink-muted">
-          This booking is missing from this browser. Start a new booking or check your saved bookings.
+          This booking is missing. Start a new booking or check your saved bookings.
         </p>
       )}
 
       <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
         <Link href="/bookings" className="app-button app-button-primary">Your bookings</Link>
-        <Link href="/therapists-list" className="app-button app-button-secondary">Browse therapists</Link>
+        <Link href="/" className="app-button app-button-secondary">Browse therapists</Link>
       </div>
     </section>
   );

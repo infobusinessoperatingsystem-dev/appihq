@@ -12,6 +12,7 @@ import type {
 import Image from "next/image";
 import { saveBooking, type SavedBooking } from "../booking-data";
 import { formatGhs } from "../money";
+import Link from "next/link";
 
 type Props = { therapist?: Therapist };
 
@@ -222,7 +223,7 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
 
   return (
     <>
-      <button
+      {/* <button
         onClick={() => router.back()}
         className="app-button app-button-quiet mb-4 px-2"
       >
@@ -238,7 +239,25 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
         >
           <path d="m15 18-6-6 6-6" />
         </svg> Therapists
-      </button>
+      </button> */}
+      <Link
+            href="/"
+            aria-label="Back to Appi home"
+            className="app-icon-button mb-4 border-0 bg-transparent"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="size-5"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </Link>
       <div className="app-surface overflow-hidden rounded-md shadow-sm">
         <div className="flex flex-col gap-5 border-b border-app-border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div className="flex min-w-0 items-center gap-4">
