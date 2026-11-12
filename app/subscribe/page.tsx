@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { formatGhs } from "../money";
 
 export const metadata: Metadata = {
   title: "Appi Membership | Appi",
@@ -107,14 +108,14 @@ export default function SubscribePage() {
 
         <aside id="payment" className="relative rounded-md bg-app-brand p-6 text-white shadow-xl sm:p-8">
           <div className="mt-2 flex items-end justify-center gap-2 border-b border-white/20 pb-7">
-            <span className="text-5xl font-semibold tracking-[-0.04em]">GHS 750</span>
+            <span className="text-5xl font-semibold tracking-[-0.04em]">{formatGhs(750)}</span>
             <span className="mb-2 text-sm text-white/65">/ year</span>
           </div>
 
           <div className="space-y-4 py-7 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-white/65">Membership</span>
-              <span>GHS 750</span>
+              <span>{formatGhs(750)}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-white/65">Billing</span>
@@ -122,7 +123,7 @@ export default function SubscribePage() {
             </div>
             <div className="flex items-center justify-between border-t border-white/20 pt-4 font-semibold">
               <span>Total today</span>
-              <span>GHS 750</span>
+              <span>{formatGhs(750)}</span>
             </div>
           </div>
 

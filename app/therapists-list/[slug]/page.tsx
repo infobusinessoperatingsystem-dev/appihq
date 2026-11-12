@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import FavoriteButton from "../favorite-button";
 import { getTherapistBySlug, therapists } from "../therapists";
 import { BookButton, ShareButton } from "./profile-actions";
+import { formatGhs } from "../../money";
 
 type TherapistProfilePageProps = {
   params: Promise<{ slug: string }>;
@@ -228,7 +229,7 @@ export default async function TherapistProfilePage({
           <footer className="sticky bottom-0 grid grid-cols-[1fr_auto] items-center gap-4 border-t border-app-border bg-app-surface/95 px-5 py-4 backdrop-blur">
             <div>
               <p className="text-xl font-semibold tracking-tight">
-                {therapist.price}
+                {formatGhs(therapist.price)}
               </p>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 {therapist.duration}

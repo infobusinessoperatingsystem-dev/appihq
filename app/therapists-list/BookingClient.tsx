@@ -11,6 +11,7 @@ import type {
 } from "./therapists";
 import Image from "next/image";
 import { saveBooking, type SavedBooking } from "../booking-data";
+import { formatGhs } from "../money";
 
 type Props = { therapist?: Therapist };
 
@@ -332,7 +333,7 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
                         <span className="min-w-0 flex-1">
                           <span className="block font-medium">{o.massageType}</span>
                           <span className="mt-1 block text-xs text-app-ink-muted">
-                            {o.durationMinutes} mins • GHS {o.price}
+                            {o.durationMinutes} mins • {formatGhs(o.price)}
                           </span>
                         </span>
                       </button>
@@ -399,7 +400,7 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
                     placeholder={selectedLocation === "home"
                       ? "Enter your house number, street, suburb, city, and a nearby landmark"
                       : "Enter the hotel name, street address, and lobby or room details"}
-                    className="app-control w-full resize-y p-3 text-sm leading-6 placeholder:text-app-ink-muted/75 focus:outline-none focus:ring-2 focus:ring-app-focus"
+                    className="app-textarea"
                   />
                   {/* <p className="mt-2 text-xs leading-5 text-app-ink-muted">
                     This address is saved with this booking on this device only.
@@ -540,9 +541,7 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
                 </p>
                 <p className="flex items-center justify-between py-3 text-sm">
                   <span className="font-medium">Total</span>
-                  <span className="text-base font-semibold">GHS{" "}
-                  {selectedOffering?.price}
-                  </span>
+                  <span className="text-base font-semibold">{formatGhs(selectedOffering?.price ?? 0)}</span>
                 </p>
               </div>
 
@@ -578,8 +577,7 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
                   {modalOffering.massageType}
                 </h4>
                 <p className="mt-1 text-sm text-app-ink-muted">
-                  {modalOffering.durationMinutes} mins • GHS{" "}
-                  {modalOffering.price}
+                  {modalOffering.durationMinutes} mins • {formatGhs(modalOffering.price)}
                 </p>
               </div>
               <button
@@ -612,8 +610,7 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
                 <p>
                   Specialized {modalOffering.massageType} session with{" "}
                   {therapist.firstName}. Duration:{" "}
-                  {modalOffering.durationMinutes} minutes. Price: GHS{" "}
-                  {modalOffering.price}.
+                  {modalOffering.durationMinutes} minutes. Price: {formatGhs(modalOffering.price)}.
                 </p>
               </div>
 

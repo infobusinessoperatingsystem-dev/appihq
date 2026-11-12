@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { Therapist } from "./therapists";
+import { formatGhs } from "../money";
 
 type Props = {
   therapists: Therapist[];
@@ -530,7 +531,7 @@ function TherapistCard({
                   From
                 </p>
                 <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                  {therapist.price}
+                  {formatGhs(therapist.price)}
                 </p>
               </div>
               <Link

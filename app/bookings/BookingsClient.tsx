@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { deleteSavedBooking, readSavedBookings, type SavedBooking } from "../booking-data";
+import { formatGhs } from "../money";
 
 type BookingFilter = "all" | "upcoming" | "past";
 
@@ -121,7 +122,7 @@ export default function BookingsClient() {
                       </dl>
                     </div>
                     <div className="flex shrink-0 items-center justify-between gap-3 border-t border-app-border pt-3 sm:flex-col sm:items-end sm:border-0 sm:pt-0">
-                      <p className="text-lg font-semibold">GHS {booking.price}</p>
+                      <p className="text-lg font-semibold">{formatGhs(booking.price)}</p>
                       <div className="flex gap-2">
                         <Link href={`/therapists-list/${booking.therapistSlug}/book`} className="app-button app-button-primary min-h-10 px-3 text-xs">
                           Book again

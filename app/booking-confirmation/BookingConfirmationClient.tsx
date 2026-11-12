@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { readSavedBooking, type SavedBooking } from "../booking-data";
+import { formatGhs } from "../money";
 
 function formatDate(value: string) {
   const [year, month, day] = value.split("-").map(Number);
@@ -71,7 +72,7 @@ export default function BookingConfirmationClient({ bookingId }: { bookingId?: s
             </div>
             <div className="flex flex-wrap justify-between gap-2 py-3 text-sm">
               <dt className="text-app-ink-muted">Total</dt>
-              <dd className="text-base font-semibold">GHS {booking.price}</dd>
+              <dd className="text-base font-semibold">{formatGhs(booking.price)}</dd>
             </div>
           </dl>
 

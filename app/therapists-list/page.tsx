@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
-import FavoriteButton from "./favorite-button";
 import { therapists } from "./therapists";
 import TherapistsListClient from "./TherapistsListClient";
+import ProviderDropdown from "./ProviderDropdown";
 
 export const metadata: Metadata = {
   title: "Available Therapists | Appi",
@@ -35,27 +34,7 @@ export default function TherapistsListPage() {
             </svg>
           </Link>
 
-          <Link
-            href="/bookings"
-            aria-label="View your bookings"
-            className="app-button app-button-brand"
-          >
-            Bookings
-            {/* <span>
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                className="size-5"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-              >
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </span> */}
-          </Link>
+          <ProviderDropdown />
         </div>
       </header>
 
