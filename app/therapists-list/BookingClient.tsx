@@ -570,7 +570,7 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
       </div>
 
       {modalOffering ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 p-3 sm:items-center">
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/55 p-3 sm:items-center">
           <div className="app-surface w-full max-w-lg rounded-md p-4 shadow-2xl">
             <div className="mb-3 flex items-start justify-between">
               <div>

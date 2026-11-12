@@ -437,7 +437,7 @@ function TherapistCard({
       </article>
 
       {isModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 p-3 sm:items-center">
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/55 p-3 sm:items-center">
           <div className="app-surface max-h-[90vh] w-full max-w-md overflow-y-auto rounded-md p-4 shadow-2xl">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
