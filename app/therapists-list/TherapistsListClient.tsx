@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Therapist } from "./therapists";
 import { formatGhs } from "../money";
 
@@ -346,6 +347,59 @@ function TherapistCard({
       : [therapist.image];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const modalTriggerRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const scrollY = window.scrollY;
+    const { body, documentElement } = document;
+    const originalStyles = {
+      bodyPosition: body.style.position,
+      bodyTop: body.style.top,
+      bodyLeft: body.style.left,
+      bodyRight: body.style.right,
+      bodyWidth: body.style.width,
+      bodyOverflow: body.style.overflow,
+      bodyPaddingRight: body.style.paddingRight,
+      documentOverflow: documentElement.style.overflow,
+    };
+    const scrollbarWidth = window.innerWidth - documentElement.clientWidth;
+
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      body.style.paddingRight = `${
+        Number.parseFloat(window.getComputedStyle(body).paddingRight) +
+        scrollbarWidth
+      }px`;
+    }
+    documentElement.style.overflow = "hidden";
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setIsModalOpen(false);
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      body.style.position = originalStyles.bodyPosition;
+      body.style.top = originalStyles.bodyTop;
+      body.style.left = originalStyles.bodyLeft;
+      body.style.right = originalStyles.bodyRight;
+      body.style.width = originalStyles.bodyWidth;
+      body.style.overflow = originalStyles.bodyOverflow;
+      body.style.paddingRight = originalStyles.bodyPaddingRight;
+      documentElement.style.overflow = originalStyles.documentOverflow;
+      window.scrollTo(0, scrollY);
+      modalTriggerRef.current?.focus();
+    };
+  }, [isModalOpen]);
 
   const showPreviousImage = () => {
     setCurrentImageIndex(
@@ -398,7 +452,12 @@ function TherapistCard({
 
           <button
             type="button"
-            onClick={() => setIsModalOpen(true)}
+            aria-haspopup="dialog"
+            aria-expanded={isModalOpen}
+            onClick={(event) => {
+              modalTriggerRef.current = event.currentTarget;
+              setIsModalOpen(true);
+            }}
             className="absolute inset-x-0 bottom-0 z-20 w-full p-4 pb-3 text-left"
           >
             <div className="mb-1.5 text-[1.05rem] font-semibold tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)]">
@@ -438,115 +497,131 @@ function TherapistCard({
         </div>
       </article>
 
-      {isModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 p-3 sm:items-center">
-          <div className="app-surface max-h-[90vh] w-full max-w-md overflow-y-auto rounded-md p-4 shadow-2xl">
-            <div className="mb-3 flex items-start justify-between gap-3">
-              <div>
-                {/* <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Therapist</p> */}
-                <h4 className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-                  {therapist.firstName}
-                  {/* , {therapist.age} */}
-                </h4>
-              </div>
-              <button
-                type="button"
-                aria-label="Close therapist details"
-                onClick={() => setIsModalOpen(false)}
-                className="app-icon-button"
+      {isModalOpen
+        ? createPortal(
+            <div
+              className="fixed inset-0 z-[100] flex items-end justify-center overflow-y-auto overscroll-contain bg-black/55 p-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:items-center"
+              onClick={() => setIsModalOpen(false)}
+            >
+              <section
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={`therapist-modal-title-${therapist.slug}`}
+                onClick={(event) => event.stopPropagation()}
+                className="therapist-details-dialog app-surface w-full max-w-md rounded-md p-4 shadow-2xl"
               >
-                ×
-              </button>
-            </div>
-
-            <div className="mb-4 grid grid-cols-3 gap-2">
-              {imageList.slice(0, 3).map((img, index) => (
-                <div
-                  key={`${therapist.slug}-modal-${index}`}
-                  className="relative h-20 overflow-hidden rounded-lg"
-                >
-                  <Image
-                    src={img}
-                    alt={`${therapist.firstName} gallery ${index + 1}`}
-                    fill
-                    sizes="(max-width: 768px) 33vw, 10rem"
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-4 text-sm text-zinc-700 dark:text-zinc-200">
-              <div>
-                <p className="mb-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
-                  About
-                </p>
-                <p>{therapist.about}</p>
-              </div>
-
-              <div>
-                <p className="mb-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
-                  Specialties
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {(therapist.specialties || []).map((specialty) => (
-                    <span
-                      key={`${therapist.slug}-${specialty}`}
-                      className="rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <div>
+                    {/* <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Therapist</p> */}
+                    <h2
+                      id={`therapist-modal-title-${therapist.slug}`}
+                      className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-50"
                     >
-                      {specialty}
-                    </span>
+                      {therapist.firstName}
+                      {/* , {therapist.age} */}
+                    </h2>
+                  </div>
+                  <button
+                    type="button"
+                    aria-label="Close therapist details"
+                    onClick={() => setIsModalOpen(false)}
+                    autoFocus
+                    className="app-icon-button"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="mb-4 grid grid-cols-3 gap-2">
+                  {imageList.slice(0, 3).map((img, index) => (
+                    <div
+                      key={`${therapist.slug}-modal-${index}`}
+                      className="relative h-20 overflow-hidden rounded-lg"
+                    >
+                      <Image
+                        src={img}
+                        alt={`${therapist.firstName} gallery ${index + 1}`}
+                        fill
+                        sizes="(max-width: 768px) 33vw, 10rem"
+                        className="object-cover"
+                      />
+                    </div>
                   ))}
                 </div>
-              </div>
 
-              <div>
-                <p className="mb-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
-                  Reviews
-                </p>
-                <div className="space-y-2">
-                  {(therapist.reviews || [])
-                    .slice(0, 3)
-                    .map((review, index) => (
-                      <div
-                        key={`${therapist.slug}-review-${index}`}
-                        className="rounded-md bg-app-surface-muted p-2"
-                      >
-                        <div className="mb-1 flex items-center justify-between text-xs">
-                          <span className="font-medium text-zinc-900 dark:text-zinc-50">
-                            {review.author}
-                          </span>
-                          <span>★ {review.rating}</span>
-                        </div>
-                        <p className="text-zinc-600 dark:text-zinc-300">
-                          {review.text}
-                        </p>
-                      </div>
-                    ))}
+                <div className="space-y-4 text-sm text-zinc-700 dark:text-zinc-200">
+                  <div>
+                    <p className="mb-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
+                      About
+                    </p>
+                    <p>{therapist.about}</p>
+                  </div>
+
+                  <div>
+                    <p className="mb-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
+                      Specialties
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {(therapist.specialties || []).map((specialty) => (
+                        <span
+                          key={`${therapist.slug}-${specialty}`}
+                          className="rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+                        >
+                          {specialty}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="mb-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
+                      Reviews
+                    </p>
+                    <div className="space-y-2">
+                      {(therapist.reviews || [])
+                        .slice(0, 3)
+                        .map((review, index) => (
+                          <div
+                            key={`${therapist.slug}-review-${index}`}
+                            className="rounded-md bg-app-surface-muted p-2"
+                          >
+                            <div className="mb-1 flex items-center justify-between text-xs">
+                              <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                                {review.author}
+                              </span>
+                              <span>★ {review.rating}</span>
+                            </div>
+                            <p className="text-zinc-600 dark:text-zinc-300">
+                              {review.text}
+                            </p>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="mt-5 flex items-center justify-between gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-                  From
-                </p>
-                <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                  {formatGhs(therapist.price)}
-                </p>
-              </div>
-              <Link
-                href={`/therapists-list/${therapist.slug}/book`}
-                onClick={() => setIsModalOpen(false)}
-                className="app-button app-button-primary"
-              >
-                Book {therapist.firstName}
-              </Link>
-            </div>
-          </div>
-        </div>
-      ) : null}
+                <div className="mt-5 flex items-center justify-between gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
+                      From
+                    </p>
+                    <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                      {formatGhs(therapist.price)}
+                    </p>
+                  </div>
+                  <Link
+                    href={`/therapists-list/${therapist.slug}/book`}
+                    onClick={() => setIsModalOpen(false)}
+                    className="app-button app-button-primary"
+                  >
+                    Book {therapist.firstName}
+                  </Link>
+                </div>
+              </section>
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

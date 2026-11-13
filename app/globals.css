@@ -298,6 +298,14 @@ body {
   outline-offset: 2px;
 }
 
+.therapist-details-dialog {
+  max-height: min(90vh, 48rem);
+  max-height: min(90dvh, 48rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
 @keyframes confirmation-panel-enter {
   from {
     opacity: 0;
