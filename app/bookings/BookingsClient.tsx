@@ -72,7 +72,7 @@ export default function BookingsClient() {
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-sm font-semibold">{bookings.length} saved {bookings.length === 1 ? "booking" : "bookings"}</p>
-          <p className="mt-1 text-xs text-app-ink-muted">Stored in this browser</p>
+          {/* <p className="mt-1 text-xs text-app-ink-muted">Stored in this browser</p> */}
         </div>
         <div role="group" aria-label="Filter bookings" className="flex gap-2">
           {filters.map((item) => (
@@ -103,7 +103,7 @@ export default function BookingsClient() {
                         <span className="rounded-full bg-app-surface-muted px-2.5 py-1 text-xs font-medium text-app-primary">
                           {isUpcoming ? "Upcoming" : "Past"}
                         </span>
-                        <span className="rounded-full border border-app-border px-2.5 py-1 text-xs text-app-ink-muted">Demo · local only</span>
+                        {/* <span className="rounded-full border border-app-border px-2.5 py-1 text-xs text-app-ink-muted">Demo · local only</span> */}
                       </div>
                       <p className="mt-1 text-sm text-app-ink-muted">With {booking.therapistName} · {booking.durationMinutes} mins</p>
                       <dl className="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
@@ -112,7 +112,7 @@ export default function BookingsClient() {
                           <dd className="mt-1 font-medium">{formatDate(booking.date)} at {formatTime(booking.time)}</dd>
                         </div>
                         <div>
-                          <dt className="text-xs text-app-ink-muted">Service type</dt>
+                          <dt className="text-xs text-app-ink-muted">Location</dt>
                           <dd className="mt-1 font-medium capitalize">{booking.serviceLocation}</dd>
                         </div>
                         <div className="sm:col-span-2">
@@ -156,9 +156,9 @@ export default function BookingsClient() {
         </section>
       )}
 
-      <p className="mt-5 text-xs leading-5 text-app-ink-muted">
+      {/* <p className="mt-5 text-xs leading-5 text-app-ink-muted">
         These demo bookings are saved only in this browser. They are not sent to therapists and will not sync to another device.
-      </p>
+      </p> */}
     </div>
   );
 }

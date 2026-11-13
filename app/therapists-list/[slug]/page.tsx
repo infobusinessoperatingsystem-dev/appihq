@@ -98,7 +98,8 @@ export default async function TherapistProfilePage({
                 id="profile-name"
                 className="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50"
               >
-                {therapist.firstName}, {therapist.age}
+                {therapist.firstName}
+                {/* , {therapist.age} */}
               </h2>
 
               <div className="mt-3 flex flex-col gap-3 text-sm text-zinc-700 dark:text-zinc-300">

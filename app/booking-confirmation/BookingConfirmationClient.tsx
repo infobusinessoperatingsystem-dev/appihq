@@ -59,7 +59,7 @@ export default function BookingConfirmationClient({ bookingId }: { bookingId?: s
               <dd className="font-medium">{booking.treatment} · {booking.durationMinutes} mins</dd>
             </div>
             <div className="flex flex-wrap justify-between gap-2 py-3 text-sm">
-              <dt className="text-app-ink-muted">Service type</dt>
+              <dt className="text-app-ink-muted">Location</dt>
               <dd className="font-medium capitalize">{booking.serviceLocation}</dd>
             </div>
             <div className="flex flex-wrap justify-between gap-2 py-3 text-sm">

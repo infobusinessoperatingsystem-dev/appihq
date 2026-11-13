@@ -404,7 +404,7 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
               {(selectedLocation === "home" || selectedLocation === "hotel") && (
                 <div className="mt-5 rounded-md border border-app-border bg-app-surface-muted p-4">
                   <label htmlFor="service-location-details" className="mb-2 block text-sm font-semibold text-app-ink">
-                    {selectedLocation === "home" ? "Where should the therapist meet you?" : "Which hotel should the therapist visit?"}
+                    {selectedLocation === "home" ? "The therapist will come to you." : "The therapist will come to you."}
                   </label>
                   <textarea
                     id="service-location-details"

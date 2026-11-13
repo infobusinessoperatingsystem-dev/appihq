@@ -363,7 +363,7 @@ function TherapistCard({
         data-therapist-card
         className="group flex flex-[0_0_92%] flex-col snap-center overflow-hidden sm:min-w-68.75 sm:max-w-73.75 sm:flex-1"
       >
-        <div className="relative block h-112 w-full overflow-hidden rounded-xl border border-app-border bg-app-surface-muted shadow-sm transition-all duration-200 hover:shadow-md">
+        <div className="relative block h-[68vh] w-full overflow-hidden rounded-xl border border-app-border bg-app-surface-muted shadow-sm transition-all duration-200 hover:shadow-md">
           <div className="absolute inset-x-0 top-0 z-20 flex items-center gap-1 p-2">
             {imageList.map((_, index) => (
               <span
@@ -439,13 +439,14 @@ function TherapistCard({
       </article>
 
       {isModalOpen ? (
-        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/55 p-3 sm:items-center">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 p-3 sm:items-center">
           <div className="app-surface max-h-[90vh] w-full max-w-md overflow-y-auto rounded-md p-4 shadow-2xl">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
                 {/* <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Therapist</p> */}
                 <h4 className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-                  {therapist.firstName}, {therapist.age}
+                  {therapist.firstName}
+                  {/* , {therapist.age} */}
                 </h4>
               </div>
               <button
