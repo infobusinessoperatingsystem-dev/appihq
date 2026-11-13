@@ -39,6 +39,7 @@ export default function BookingsClient() {
   const [bookings, setBookings] = useState<SavedBooking[]>([]);
   const [filter, setFilter] = useState<BookingFilter>("all");
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [bookingToRemove, setBookingToRemove] = useState<SavedBooking | null>(null);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -59,8 +60,10 @@ export default function BookingsClient() {
       .sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`));
   }, [bookings, filter]);
 
-  function removeBooking(id: string) {
-    setBookings(deleteSavedBooking(id));
+  function confirmRemoveBooking() {
+    if (!bookingToRemove) return;
+    setBookings(deleteSavedBooking(bookingToRemove.id));
+    setBookingToRemove(null);
   }
 
   if (!hasLoaded) {
@@ -124,10 +127,10 @@ export default function BookingsClient() {
                     <div className="flex shrink-0 items-center justify-between gap-3 border-t border-app-border pt-3 sm:flex-col sm:items-end sm:border-0 sm:pt-0">
                       <p className="text-lg font-semibold">{formatGhs(booking.price)}</p>
                       <div className="flex gap-2">
-                        <Link href={`/therapists-list/${booking.therapistSlug}/book`} className="app-button app-button-primary min-h-10 px-3 text-xs">
+                        <Link href={`/therapists-list/${booking.therapistSlug}/book?repeat=${encodeURIComponent(booking.id)}`} className="app-button app-button-primary min-h-10 px-3 text-xs">
                           Book again
                         </Link>
-                        <button type="button" onClick={() => removeBooking(booking.id)} className="app-button app-button-secondary min-h-10 px-3 text-xs">
+                        <button type="button" onClick={() => setBookingToRemove(booking)} className="app-button app-button-secondary min-h-10 px-3 text-xs">
                           Remove
                         </button>
                       </div>
@@ -159,6 +162,50 @@ export default function BookingsClient() {
       {/* <p className="mt-5 text-xs leading-5 text-app-ink-muted">
         These demo bookings are saved only in this browser. They are not sent to therapists and will not sync to another device.
       </p> */}
+
+      {bookingToRemove ? (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 p-3 sm:items-center"
+          onClick={() => setBookingToRemove(null)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") setBookingToRemove(null);
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="remove-booking-title"
+            aria-describedby="remove-booking-description"
+            className="app-surface w-full max-w-md rounded-md p-5 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 id="remove-booking-title" className="text-xl font-semibold">
+              Remove this booking?
+            </h2>
+            <p id="remove-booking-description" className="mt-2 text-sm leading-6 text-app-ink-muted">
+              This will remove your {bookingToRemove.treatment} booking with{" "}
+              {bookingToRemove.therapistName} from this device.
+            </p>
+            <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                autoFocus
+                onClick={() => setBookingToRemove(null)}
+                className="app-button app-button-secondary"
+              >
+                Keep booking
+              </button>
+              <button
+                type="button"
+                onClick={confirmRemoveBooking}
+                className="app-button app-button-primary"
+              >
+                Remove booking
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -395,7 +395,7 @@ export const therapists: Therapist[] = [
     isVerified: true,
     joinedAt: "2026-08-28T17:00:00Z",
     reviews: [
-      { author: "Paul", rating: 5, text: "Lovely technique and very kind.", date: "2026-08-25" }, { author: "Nana Asare", rating: 5, text: "Very professional, highly recommend.", date: "2026-08-26" },
+      { author: "Paul", rating: 5, text: "Lovely technique and very kind.", date: "2026-08-25" }, { author: "Nana Asare", rating: 5, text: "Very professional, highly recommend.", date: "2026-08-26" }, { author: "Godfred Amoah", rating: 5, text: "Excellent service. I loved it.", date: "2026-08-26" },
     ],
     massageOfferings: [
       { massageType: "Nuru", durationMinutes: 90, price: 1000 },

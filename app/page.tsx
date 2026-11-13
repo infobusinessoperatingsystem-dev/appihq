@@ -5,7 +5,7 @@ import { therapists } from "./therapists-list/therapists";
 import ProviderDropdown from "./therapists-list/ProviderDropdown";
 
 export const metadata: Metadata = {
-  title: "Appi | Massage, your way",
+  title: "Appi | At your service!",
   description: "Find a massage therapist on Appi.",
 };
 

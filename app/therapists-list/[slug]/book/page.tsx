@@ -1,7 +1,14 @@
 import BookingClient from "../../BookingClient";
 export const dynamic = "force-dynamic";
 
-export default function BookingPage() {
+export default async function BookingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ repeat?: string | string[] }>;
+}) {
+  const { repeat } = await searchParams;
+  const repeatBookingId = Array.isArray(repeat) ? repeat[0] : repeat;
+
   return (
     <main className="app-page min-h-screen flex-1 font-sans">
       <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-8 sm:py-10">
@@ -10,7 +17,7 @@ export default function BookingPage() {
           <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Book your massage</h1>
           <p className="mt-2 text-sm leading-6 text-app-ink-muted">Choose a treatment, a location, and a time that works for you.</p>
         </div> */}
-        <BookingClient />
+        <BookingClient repeatBookingId={repeatBookingId} />
       </div>
     </main>
   );

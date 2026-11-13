@@ -80,7 +80,7 @@ body {
 }
 
 .app-page {
-  min-height: 100vh;
+  min-height: 80vh;
   background: var(--app-canvas);
   color: var(--app-ink);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type {
   Therapist,
@@ -10,11 +10,11 @@ import type {
   WalkInLocation,
 } from "./therapists";
 import Image from "next/image";
-import { saveBooking, type SavedBooking } from "../booking-data";
+import { readSavedBooking, saveBooking, type SavedBooking } from "../booking-data";
 import { formatGhs } from "../money";
 import Link from "next/link";
 
-type Props = { therapist?: Therapist };
+type Props = { therapist?: Therapist; repeatBookingId?: string };
 
 const emptyOfferings: MassageOffering[] = [];
 const emptyAvailability: TherapistAvailability[] = [];
@@ -62,7 +62,10 @@ function generateTimeSlots(start: string, end: string, duration: number) {
   return slots;
 }
 
-export default function BookingClient({ therapist: therapistProp }: Props) {
+export default function BookingClient({
+  therapist: therapistProp,
+  repeatBookingId,
+}: Props) {
   // When used from `/[slug]/book`, read slug client-side and resolve therapist.
   const [therapist, setTherapist] = useState<Therapist | undefined>(
     therapistProp,
@@ -107,9 +110,47 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
   );
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [bookingError, setBookingError] = useState<string | null>(null);
+  const [repeatError, setRepeatError] = useState<string | null>(null);
   const [modalOffering, setModalOffering] = useState<MassageOffering | null>(
     null,
   );
+
+  useEffect(() => {
+    if (!therapist) return;
+
+    const frame = requestAnimationFrame(() => {
+      if (!repeatBookingId) return;
+
+      const savedBooking = readSavedBooking(repeatBookingId);
+      if (!savedBooking || savedBooking.therapistSlug !== therapist.slug) {
+        setRepeatError("We couldn't load that booking. You can start a new booking instead.");
+        return;
+      }
+
+      const currentOffering = offerings.find(
+        (offering) => offering.massageType === savedBooking.treatment,
+      );
+      setSelectedOffering({
+        ...currentOffering,
+        massageType: savedBooking.treatment,
+        durationMinutes: savedBooking.durationMinutes,
+        price: savedBooking.price,
+      });
+      setSelectedLocation(savedBooking.serviceLocation);
+      setLocationDetails(savedBooking.locationDetails);
+      const walkInLocation = walkInLocations.find(
+        (location) =>
+          `${location.name} — ${location.address}` === savedBooking.locationDetails,
+      );
+      setSelectedWalkInLocationId(walkInLocation?.id ?? "");
+      setSelectedDate(savedBooking.date);
+      setSelectedTime(savedBooking.time);
+      setStep(3);
+      setRepeatError(null);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [therapist, repeatBookingId, offerings, walkInLocations]);
 
   const availableDates = useMemo(
     () => availability.map((a) => a.date),
@@ -169,7 +210,7 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
     if (selectedLocation === "walk-in") {
       return selectedWalkInLocation
         ? `${selectedWalkInLocation.name} — ${selectedWalkInLocation.address}`
-        : "";
+        : locationDetails.trim();
     }
     return locationDetails.trim();
   }
@@ -311,6 +352,12 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
             ))}
           </ol>
         </div>
+
+        {repeatError ? (
+          <p role="alert" className="mx-4 mt-4 rounded-md border border-app-border bg-app-surface-muted p-3 text-sm text-app-ink sm:mx-6">
+            {repeatError}
+          </p>
+        ) : null}
 
         <div className="space-y-6 p-4 sm:p-6">
           {step === 0 && (
@@ -483,6 +530,11 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
                       className="app-control app-control-select text-sm focus:outline-none focus:ring-2 focus:ring-app-focus"
                     >
                       <option value="">Choose a date</option>
+                      {selectedDate && !availableDates.includes(selectedDate) ? (
+                        <option value={selectedDate}>
+                          {formatBookingDate(selectedDate)} (previous booking)
+                        </option>
+                      ) : null}
                       {availableDates.map((date) => (
                         <option key={date} value={date}>
                           {formatBookingDate(date)}
@@ -504,6 +556,11 @@ export default function BookingClient({ therapist: therapistProp }: Props) {
                       className="app-control app-control-select text-sm focus:outline-none focus:ring-2 focus:ring-app-focus disabled:cursor-not-allowed disabled:opacity-55"
                     >
                       <option value="">Choose a time</option>
+                      {selectedTime && !timeSlots.includes(selectedTime) ? (
+                        <option value={selectedTime}>
+                          {formatBookingTime(selectedTime)} (previous booking)
+                        </option>
+                      ) : null}
                       {timeSlots.map((time) => (
                         <option key={time} value={time}>
                           {formatBookingTime(time)}
