@@ -37,6 +37,9 @@ export type Therapist = {
   about: string;
   isNew?: boolean;
   isVerified?: boolean;
+  verifiedAt?: string;
+  spokenLanguages?: string[];
+  profession?: string;
   joinedAt?: string;
   reviews?: { author: string; rating: number; text: string; date?: string }[];
 

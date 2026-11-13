@@ -347,7 +347,11 @@ function TherapistCard({
       : [therapist.image];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isVerificationCardFlipped, setIsVerificationCardFlipped] = useState(false);
+  const [visibleReviewCount, setVisibleReviewCount] = useState(3);
   const modalTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const reviews = therapist.reviews ?? [];
+  const offerings = therapist.massageOfferings ?? [];
 
   useEffect(() => {
     if (!isModalOpen) return;
@@ -411,6 +415,12 @@ function TherapistCard({
     setCurrentImageIndex((prev) => (prev + 1) % imageList.length);
   };
 
+  function closeModal() {
+    setIsModalOpen(false);
+    setIsVerificationCardFlipped(false);
+    setVisibleReviewCount(3);
+  }
+
   return (
     <>
       <article
@@ -456,6 +466,8 @@ function TherapistCard({
             aria-expanded={isModalOpen}
             onClick={(event) => {
               modalTriggerRef.current = event.currentTarget;
+              setIsVerificationCardFlipped(false);
+              setVisibleReviewCount(3);
               setIsModalOpen(true);
             }}
             className="absolute inset-x-0 bottom-0 z-20 w-full p-4 pb-3 text-left"
@@ -501,7 +513,7 @@ function TherapistCard({
         ? createPortal(
             <div
               className="fixed inset-0 z-[100] flex items-end justify-center overflow-y-auto overscroll-contain bg-black/55 p-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:items-center"
-              onClick={() => setIsModalOpen(false)}
+              onClick={closeModal}
             >
               <section
                 role="dialog"
@@ -510,21 +522,22 @@ function TherapistCard({
                 onClick={(event) => event.stopPropagation()}
                 className="therapist-details-dialog app-surface w-full max-w-md rounded-md p-4 shadow-2xl"
               >
-                <div className="mb-3 flex items-start justify-between gap-3">
-                  <div>
-                    {/* <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Therapist</p> */}
+                <div className="mb-4 flex items-start justify-end gap-3">
+                  {/* <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+                      Therapist profile
+                    </p>
                     <h2
                       id={`therapist-modal-title-${therapist.slug}`}
-                      className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-50"
+                      className="mt-1 text-2xl font-semibold text-app-ink"
                     >
                       {therapist.firstName}
-                      {/* , {therapist.age} */}
                     </h2>
-                  </div>
+                  </div> */}
                   <button
                     type="button"
                     aria-label="Close therapist details"
-                    onClick={() => setIsModalOpen(false)}
+                    onClick={closeModal}
                     autoFocus
                     className="app-icon-button"
                   >
@@ -532,86 +545,315 @@ function TherapistCard({
                   </button>
                 </div>
 
-                <div className="mb-4 grid grid-cols-3 gap-2">
-                  {imageList.slice(0, 3).map((img, index) => (
-                    <div
-                      key={`${therapist.slug}-modal-${index}`}
-                      className="relative h-20 overflow-hidden rounded-lg"
+                <section aria-labelledby={`identity-heading-${therapist.slug}`}>
+                  <div className="therapist-profile-card-perspective">
+                    <button
+                      type="button"
+                      aria-label={
+                        isVerificationCardFlipped
+                          ? `Show ${therapist.firstName}'s profile`
+                          : `Show ${therapist.firstName}'s verification details`
+                      }
+                      aria-pressed={isVerificationCardFlipped}
+                      onClick={() =>
+                        setIsVerificationCardFlipped((flipped) => !flipped)
+                      }
+                      className={`therapist-profile-card ${
+                        isVerificationCardFlipped ? "is-flipped" : ""
+                      }`}
                     >
-                      <Image
-                        src={img}
-                        alt={`${therapist.firstName} gallery ${index + 1}`}
-                        fill
-                        sizes="(max-width: 768px) 33vw, 10rem"
-                        className="object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="space-y-4 text-sm text-zinc-700 dark:text-zinc-200">
-                  <div>
-                    <p className="mb-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
-                      About
-                    </p>
-                    <p>{therapist.about}</p>
-                  </div>
-
-                  <div>
-                    <p className="mb-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
-                      Specialties
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {(therapist.specialties || []).map((specialty) => (
-                        <span
-                          key={`${therapist.slug}-${specialty}`}
-                          className="rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
-                        >
-                          {specialty}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="mb-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
-                      Reviews
-                    </p>
-                    <div className="space-y-2">
-                      {(therapist.reviews || [])
-                        .slice(0, 3)
-                        .map((review, index) => (
-                          <div
-                            key={`${therapist.slug}-review-${index}`}
-                            className="rounded-md bg-app-surface-muted p-2"
-                          >
-                            <div className="mb-1 flex items-center justify-between text-xs">
-                              <span className="font-medium text-zinc-900 dark:text-zinc-50">
-                                {review.author}
+                      <div className="therapist-profile-card-face justify-center  therapist-profile-card-front">
+                        <div className="flex flex-col items-center gap-3">
+                          <span className="relative size-24 shrink-0">
+                            <span className="absolute inset-0 overflow-hidden rounded-full">
+                              <Image
+                                src={therapist.image}
+                                alt=""
+                                fill
+                                sizes="6rem"
+                                className="object-cover"
+                              />
+                            </span>
+                            {therapist.isVerified ? (
+                              <span
+                                aria-label="Identity verified"
+                                className="absolute -right-1 bottom-1 flex size-7 items-center justify-center rounded-full border-0 border-app-surface bg-emerald-600 text-white shadow-md"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  viewBox="0 0 24 24"
+                                  className="size-5"
+                                  fill="currentColor"
+                                >
+                                  <path d="M12 2.5 20 5v6.2c0 5.2-3.4 8.6-8 10.3-4.6-1.7-8-5.1-8-10.3V5l8-2.5Zm-1.1 12.9 5.3-5.3-1.4-1.4-3.9 3.9-1.8-1.8-1.4 1.4 3.2 3.2Z" />
+                                </svg>
                               </span>
-                              <span>★ {review.rating}</span>
+                            ) : null}
+                          </span>
+                          <div className="flex min-w-0 h-max flex-1 flex-col items-center">
+                            <span className="text-2xl font-semibold text-app-ink">
+                              {therapist.firstName}
+                            </span>
+                            <span className="text-sm text-app-ink-muted">
+                              {therapist.profession ?? "Massage therapist"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-center gap-1.5">
+                          <div className="mt-3 flex flex-col gap-1.5 text-2xl font-medium text-app-ink">
+                            <div className="flex flex-col">
+                              <span aria-hidden="true" className="">
+                                {therapist.reviewCount}
+                              </span>
+                              <span className="text-sm font-normal text-app-ink-muted">
+                                Reviews
+                              </span>
                             </div>
-                            <p className="text-zinc-600 dark:text-zinc-300">
+                            <div className="w-4rem text-app-ink-muted bg-app-ink-muted h-px"></div>
+                            <div className="flex flex-col">
+                              <span aria-hidden="true" className="">
+                                {therapist.rating} ★
+                              </span>
+                              <span className="text-sm font-normal text-app-ink-muted">
+                                Rating
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <span className="therapist-profile-card-face therapist-profile-card-back">
+                        <span className="flex min-w-0 flex-1 flex-col text-center">
+                          <div className="flex items-center gap-2">
+                            <span className="relative size-14 overflow-hidden rounded-full border-2 border-white/70">
+                              <Image
+                                src={therapist.image}
+                                alt=""
+                                fill
+                                sizes="3.5rem"
+                                className="object-cover"
+                              />
+                            </span>
+                            <span className="text-lg font-semibold">
+                              {therapist.firstName}
+                            </span>
+
+                          </div>
+                          {therapist.isVerified ? (
+                            <>
+                              <span className="mt-1 text-xs text-start text-white/80">
+                                Verified{" "}
+                                {formatVerifiedDate(therapist.verifiedAt)}
+                              </span>
+                              <span className="mt-2 text-xs text-start leading-4 text-white/90">
+                                Trust is central to what we do at Appi, and identity
+                                verification helps build it. We check a person’s
+                                details against a government-issued ID to make
+                                sure they are who they claim to be.
+                              </span>
+                            </>
+                          ) : (
+                            <span className="mt-2 text-sm leading-5 text-white/90">
+                              Identity verification has not been completed for
+                              this profile.
+                            </span>
+                          )}
+                          {/* <span className="mt-2 text-[11px] font-medium text-white/75">
+                            Tap to flip back
+                          </span> */}
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+
+                  <dl className="space-y-2 rounded-lg bg-app-surface-mute p-3 text-sm">
+                    <div className="flex items-start gap-2">
+                      <dt className="flex shrink-0 items-center gap-2 font-semibold text-app-ink">
+                        <svg
+                          aria-hidden="true"
+                          viewBox="0 0 24 24"
+                          className="mt-0.5 size-4 text-app-primary"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.8"
+                        >
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                        </svg>
+                        Speaks
+                      </dt>
+                      <dd className="text-app-ink-muted">
+                        {therapist.spokenLanguages?.length
+                          ? therapist.spokenLanguages.join(", ")
+                          : "Not provided"}
+                      </dd>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <dt className="flex shrink-0 items-center gap-2 font-semibold text-app-ink">
+                        <svg
+                          aria-hidden="true"
+                          viewBox="0 0 24 24"
+                          className="mt-0.5 size-4 text-app-primary"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.8"
+                        >
+                          <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+                          <circle cx="12" cy="10" r="2.5" />
+                        </svg>
+                        Lives in
+                      </dt>
+                      <dd className="text-app-ink-muted">
+                        {therapist.location}, Ghana
+                      </dd>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <dt className="flex shrink-0 items-center gap-2 font-semibold text-app-ink">
+                        <svg
+                          aria-hidden="true"
+                          viewBox="0 0 24 24"
+                          className="mt-0.5 size-4 text-app-primary"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.8"
+                        >
+                          <path d="m12 3 2.3 4.7 5.2.8-3.8 3.7.9 5.2-4.6-2.5-4.6 2.5.9-5.2-3.8-3.7 5.2-.8L12 3Z" />
+                        </svg>
+                        Specializes in
+                      </dt>
+                      <dd className="flex flex-wrap gap-1.5 text-app-ink-muted">
+                        {therapist.specialties.length > 0
+                          ? therapist.specialties.map((specialty) => (
+                              <span
+                                key={`${therapist.slug}-profile-${specialty}`}
+                                className="rounded-full border border-app-border px-2 py-0.5 text-xs"
+                              >
+                                {specialty}
+                              </span>
+                            ))
+                          : "Not provided"}
+                      </dd>
+                    </div>
+                  </dl>
+                </section>
+
+                <section
+                  aria-labelledby={`reviews-heading-${therapist.slug}`}
+                  className="mt-5 border-t border-app-border pt-4"
+                >
+                  <h3
+                    id={`reviews-heading-${therapist.slug}`}
+                    className="text-base font-semibold text-app-ink"
+                  >
+                    What clients are saying
+                  </h3>
+                  {reviews.length ? (
+                    <>
+                      <div className="mt-3 space-y-2">
+                        {reviews.slice(0, visibleReviewCount).map((review, index) => (
+                          <article
+                            key={`${therapist.slug}-review-${index}`}
+                            className="rounded-lg bg-app-surface-muted p-3"
+                          >
+                            <div className="flex items-center justify-between gap-3 text-sm">
+                              <h4 className="font-semibold text-app-ink">
+                                {review.author}
+                              </h4>
+                              <span
+                                aria-label={`${review.rating} out of 5 stars`}
+                                className="shrink-0 text-amber-600"
+                              >
+                                ★ {review.rating}
+                              </span>
+                            </div>
+                            <p className="mt-1 text-sm leading-5 text-app-ink-muted">
                               {review.text}
                             </p>
-                          </div>
+                            {review.date ? (
+                              <time
+                                dateTime={review.date}
+                                className="mt-2 block text-xs text-app-ink-muted"
+                              >
+                                {formatVerifiedDate(review.date)}
+                              </time>
+                            ) : null}
+                          </article>
                         ))}
-                    </div>
-                  </div>
-                </div>
+                      </div>
+                      {visibleReviewCount < reviews.length ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setVisibleReviewCount((count) =>
+                              Math.min(count + 5, reviews.length),
+                            )
+                          }
+                          className="app-button app-button-secondary mt-3 min-h-10 w-full text-sm"
+                        >
+                          {visibleReviewCount === 3
+                            ? `Show all ${reviews.length} reviews`
+                            : "Show more reviews"}
+                        </button>
+                      ) : null}
+                    </>
+                  ) : (
+                    <p className="mt-2 text-sm text-app-ink-muted">
+                      No client reviews yet.
+                    </p>
+                  )}
+                </section>
 
-                <div className="mt-5 flex items-center justify-between gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-                      From
+                <section
+                  aria-labelledby={`services-heading-${therapist.slug}`}
+                  className="mt-5 border-t border-app-border pt-4"
+                >
+                  <h3
+                    id={`services-heading-${therapist.slug}`}
+                    className="text-base font-semibold text-app-ink"
+                  >
+                    Services offered
+                  </h3>
+                  {offerings.length ? (
+                    <ul className="mt-3 space-y-2">
+                      {offerings.map((offering) => (
+                        <li
+                          key={`${therapist.slug}-${offering.massageType}`}
+                          className="flex items-center justify-between gap-3 rounded-lg bg-app-surface-muted px-3 py-2 text-sm"
+                        >
+                          <span className="font-medium text-app-ink">
+                            {offering.massageType}
+                          </span>
+                          <span className="shrink-0 text-app-ink-muted">
+                            {offering.durationMinutes} min ·{" "}
+                            {formatGhs(offering.price)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-2 text-sm text-app-ink-muted">
+                      Services have not been listed yet.
                     </p>
-                    <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                      {formatGhs(therapist.price)}
-                    </p>
-                  </div>
+                  )}
+                </section>
+
+                <div className="mt-5 flex items-center justify-between gap-3 border-t border-app-border pt-4">
+                  <Link
+                    href={`/therapists-list/${therapist.slug}/report`}
+                    onClick={closeModal}
+                    className="app-link text-sm font-medium text-red-700 dark:text-red-300"
+                  >
+                    Report {therapist.firstName}
+                  </Link>
                   <Link
                     href={`/therapists-list/${therapist.slug}/book`}
-                    onClick={() => setIsModalOpen(false)}
+                    onClick={closeModal}
                     className="app-button app-button-primary"
                   >
                     Book {therapist.firstName}
@@ -638,6 +880,19 @@ function formatJoinedLabel(joinedAt?: string) {
   if (diffHours > 0)
     return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
   return `${diffMinutes} minute${diffMinutes === 1 ? "" : "s"} ago`;
+}
+
+function formatVerifiedDate(value?: string) {
+  if (!value) return "date not provided";
+
+  const [year, month, day] = value.slice(0, 10).split("-").map(Number);
+  if (!year || !month || !day) return "date not provided";
+
+  return new Intl.DateTimeFormat("en-GH", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(year, month - 1, day));
 }
 
 function CategoryDetails({
