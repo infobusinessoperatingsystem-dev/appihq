@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type {
   Therapist,
   MassageOffering,
@@ -12,8 +13,19 @@ import type {
 import Image from "next/image";
 import { readSavedBooking, saveBooking, type SavedBooking } from "../booking-data";
 import { formatGhs } from "../money";
+import {
+  getProviderAvailability,
+  getProviderTimeSlots,
+  readProviderSettings,
+  subscribeToProviderSettings,
+  type ProviderSettings,
+} from "@/lib/provider-settings";
 
-type Props = { therapist?: Therapist; repeatBookingId?: string };
+type Props = {
+  therapist?: Therapist;
+  repeatBookingId?: string;
+  rescheduleBookingId?: string;
+};
 
 const emptyOfferings: MassageOffering[] = [];
 const emptyAvailability: TherapistAvailability[] = [];
@@ -73,37 +85,59 @@ function generateTimeSlots(start: string, end: string, duration: number) {
 export default function BookingClient({
   therapist: therapistProp,
   repeatBookingId,
+  rescheduleBookingId,
 }: Props) {
   // When used from `/[slug]/book`, read slug client-side and resolve therapist.
   const [therapist, setTherapist] = useState<Therapist | undefined>(
     therapistProp,
   );
+  const [isTherapistLoading, setIsTherapistLoading] = useState(
+    () => !therapistProp,
+  );
+  const [providerSettings, setProviderSettings] =
+    useState<ProviderSettings | null>(null);
+  const [providerSettingsError, setProviderSettingsError] = useState("");
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (therapistProp) return;
-    try {
+
+    let isCurrent = true;
+
+    async function resolveTherapist() {
       const path =
         typeof window !== "undefined" ? window.location.pathname : "";
       const parts = path.split("/").filter(Boolean);
-      // path expected: /therapists-list/:slug/book
       const slugIndex = parts.indexOf("therapists-list") + 1;
       const slug = parts[slugIndex];
-      if (slug) {
-        // dynamic import of therapist data
-        import("./therapists").then((m) => {
-          const found = (m.therapists || []).find(
-            (t: Therapist) => t.slug === slug,
-          );
-          setTherapist(found);
-        });
+
+      if (!slug) {
+        setTherapist(undefined);
+        setIsTherapistLoading(false);
+        return;
       }
-    } catch {
-      // ignore
+
+      try {
+        const { therapists } = await import("./therapists");
+        if (!isCurrent) return;
+
+        setTherapist(therapists.find((item) => item.slug === slug));
+      } catch {
+        if (!isCurrent) return;
+
+        setTherapist(undefined);
+      } finally {
+        if (isCurrent) setIsTherapistLoading(false);
+      }
     }
+
+    void resolveTherapist();
+
+    return () => {
+      isCurrent = false;
+    };
   }, [therapistProp]);
 
   const offerings = therapist?.massageOfferings ?? emptyOfferings;
-  const availability = therapist?.availability ?? emptyAvailability;
   const serviceLocations = therapist?.serviceLocations ?? emptyServiceLocations;
   const walkInLocations = therapist?.walkInLocations ?? emptyWalkInLocations;
 
@@ -113,10 +147,10 @@ export default function BookingClient({
   const [selectedLocation, setSelectedLocation] = useState<ServiceLocation | null>(null);
   const [locationDetails, setLocationDetails] = useState("");
   const [selectedWalkInLocationId, setSelectedWalkInLocationId] = useState("");
-  const [selectedDate, setSelectedDate] = useState<string | null>(
-    availability[0]?.date || null,
-  );
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [clientName, setClientName] = useState("");
+  const [clientNotes, setClientNotes] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneNumberTouched, setPhoneNumberTouched] = useState(false);
   const [contactStorageError, setContactStorageError] = useState<string | null>(null);
@@ -125,6 +159,19 @@ export default function BookingClient({
   const [modalOffering, setModalOffering] = useState<MassageOffering | null>(
     null,
   );
+
+  const availability = useMemo(() => {
+    if (providerSettings) return getProviderAvailability(providerSettings);
+    return therapist?.availability ?? emptyAvailability;
+  }, [providerSettings, therapist]);
+  const effectiveSelectedOffering = useMemo(() => {
+    if (!selectedOffering || !providerSettings) return selectedOffering;
+    return {
+      ...selectedOffering,
+      durationMinutes: providerSettings.sessionDurationMinutes,
+      price: providerSettings.sessionFee,
+    };
+  }, [providerSettings, selectedOffering]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -172,6 +219,8 @@ export default function BookingClient({
       setSelectedWalkInLocationId(walkInLocation?.id ?? "");
       setSelectedDate(savedBooking.date);
       setSelectedTime(savedBooking.time);
+      setClientName(savedBooking.clientName ?? "");
+      setClientNotes(savedBooking.notes ?? "");
       if (savedBooking.phoneNumber) setPhoneNumber(savedBooking.phoneNumber);
       setStep(3);
       setRepeatError(null);
@@ -180,13 +229,40 @@ export default function BookingClient({
     return () => cancelAnimationFrame(frame);
   }, [therapist, repeatBookingId, offerings, walkInLocations]);
 
+  useEffect(() => {
+    if (!therapist) return;
+    const therapistSlug = therapist.slug;
+
+    function syncProviderSettings() {
+      try {
+        setProviderSettings(readProviderSettings(therapistSlug) ?? null);
+        setProviderSettingsError("");
+      } catch {
+        setProviderSettings(null);
+        setProviderSettingsError(
+          "Provider availability settings couldn’t be read. The public page is showing its standard sample times.",
+        );
+      }
+    }
+
+    const frame = requestAnimationFrame(syncProviderSettings);
+    const unsubscribe = subscribeToProviderSettings(syncProviderSettings);
+    return () => {
+      cancelAnimationFrame(frame);
+      unsubscribe();
+    };
+  }, [therapist]);
+
   const availableDates = useMemo(
     () => availability.map((a) => a.date),
     [availability],
   );
 
   const timeSlots = useMemo(() => {
-    if (!selectedDate || !selectedOffering) return [];
+    if (!selectedDate || !effectiveSelectedOffering) return [];
+    if (providerSettings) {
+      return getProviderTimeSlots(selectedDate, providerSettings);
+    }
     const day = availability.find((a) => a.date === selectedDate) as
       | TherapistAvailability
       | undefined;
@@ -194,9 +270,33 @@ export default function BookingClient({
     return generateTimeSlots(
       day.startTime,
       day.endTime,
-      selectedOffering.durationMinutes,
+      effectiveSelectedOffering.durationMinutes,
     );
-  }, [selectedDate, selectedOffering, availability]);
+  }, [
+    selectedDate,
+    effectiveSelectedOffering,
+    providerSettings,
+    availability,
+  ]);
+
+  const nextAvailableDate = useMemo(() => {
+    if (!selectedDate || !effectiveSelectedOffering) return null;
+
+    return [...availability]
+      .filter((day) => day.date > selectedDate)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .find(
+        (day) =>
+          (providerSettings
+            ? getProviderTimeSlots(day.date, providerSettings)
+            : generateTimeSlots(
+                day.startTime,
+                day.endTime,
+                effectiveSelectedOffering.durationMinutes,
+              )
+          ).length > 0,
+      )?.date ?? null;
+  }, [availability, selectedDate, effectiveSelectedOffering, providerSettings]);
 
   const selectedWalkInLocation = walkInLocations.find(
     (location) => location.id === selectedWalkInLocationId,
@@ -245,7 +345,7 @@ export default function BookingClient({
 
   function canProceedToSummary() {
     return (
-      !!selectedOffering &&
+      !!effectiveSelectedOffering &&
       canProceedFromLocation() &&
       !!selectedDate &&
       !!selectedTime
@@ -270,12 +370,17 @@ export default function BookingClient({
     if (
       !therapist ||
       !selectedOffering ||
+      !effectiveSelectedOffering ||
       !selectedLocation ||
       !selectedDate ||
       !selectedTime ||
       !canProceedFromLocation() ||
+      !clientName.trim() ||
       !isValidPhoneNumber(phoneNumber)
     ) {
+      if (!clientName.trim()) {
+        setBookingError("Enter your name so the therapist knows who is coming.");
+      }
       setPhoneNumberTouched(true);
       return;
     }
@@ -284,19 +389,22 @@ export default function BookingClient({
       id: crypto.randomUUID(),
       therapistSlug: therapist.slug,
       therapistName: therapist.firstName,
+      clientName: clientName.trim(),
+      notes: clientNotes.trim(),
       treatment: selectedOffering.massageType,
-      durationMinutes: selectedOffering.durationMinutes,
+      durationMinutes: effectiveSelectedOffering.durationMinutes,
       serviceLocation: selectedLocation,
       locationDetails: getLocationDetails(),
       date: selectedDate,
       time: selectedTime,
-      price: selectedOffering.price,
+      price: effectiveSelectedOffering.price,
       phoneNumber: phoneNumber.trim(),
+      timeZone: "Africa/Accra",
       createdAt: new Date().toISOString(),
       demo: true,
     };
 
-    if (!saveBooking(booking)) {
+    if (!saveBooking(booking, rescheduleBookingId)) {
       setBookingError("This browser could not save your booking. Check storage settings and try again.");
       return;
     }
@@ -309,6 +417,23 @@ export default function BookingClient({
   }
 
   if (!therapist) {
+    if (!isTherapistLoading) {
+      return (
+        <section className="app-surface rounded-md p-8 text-center shadow-sm sm:p-10">
+          <h2 className="text-xl font-semibold text-app-ink">
+            Therapist unavailable
+          </h2>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-app-ink-muted">
+            This therapist profile could not be found or loaded. Browse the
+            available therapists to choose another one.
+          </p>
+          <Link href="/therapists-list" className="app-button app-button-primary mt-5">
+            Browse therapists
+          </Link>
+        </section>
+      );
+    }
+
     return (
       <div className="app-surface rounded-md p-8 text-center shadow-sm">
         <p className="text-sm text-app-ink-muted">Loading therapist details…</p>
@@ -417,6 +542,26 @@ export default function BookingClient({
           </ol>
         </div>
 
+        {providerSettingsError ? (
+          <p role="alert" className="mx-4 mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 sm:mx-6">
+            {providerSettingsError}
+          </p>
+        ) : null}
+        {providerSettings?.meetingModes.length ? (
+          <p className="mx-4 mt-4 text-sm text-app-ink-muted sm:mx-6">
+            Session modes:{" "}
+            {providerSettings.meetingModes
+              .map((mode) =>
+                mode === "video"
+                  ? "Video call"
+                  : mode === "phone"
+                    ? "Phone / WhatsApp"
+                    : "In person",
+              )
+              .join(" · ")}
+          </p>
+        ) : null}
+
         {repeatError ? (
           <p role="alert" className="mx-4 mt-4 rounded-md border border-app-border bg-app-surface-muted p-3 text-sm text-app-ink sm:mx-6">
             {repeatError}
@@ -463,7 +608,8 @@ export default function BookingClient({
                         <span className="min-w-0 flex-1">
                           <span className="block font-medium">{o.massageType}</span>
                           <span className="mt-1 block text-xs text-app-ink-muted">
-                            {o.durationMinutes} mins • {formatGhs(o.price)}
+                            {providerSettings?.sessionDurationMinutes ?? o.durationMinutes} mins •{" "}
+                            {formatGhs(providerSettings?.sessionFee ?? o.price)}
                           </span>
                         </span>
                       </button>
@@ -636,7 +782,27 @@ export default function BookingClient({
                 </div>
               </div>
               {selectedDate && timeSlots.length === 0 && (
-                <p className="mt-3 text-sm text-app-ink-muted">No start times are available for this date and treatment.</p>
+                <div className="mt-3">
+                  <p className="text-sm text-app-ink-muted">
+                    No start times are available for this date and treatment.
+                  </p>
+                  {nextAvailableDate ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedDate(nextAvailableDate);
+                        setSelectedTime(null);
+                      }}
+                      className="app-button app-button-secondary mt-3"
+                    >
+                      Jump to next available date ({formatBookingDate(nextAvailableDate)})
+                    </button>
+                  ) : (
+                    <p className="mt-2 text-sm text-app-ink-muted">
+                      No later dates with available start times are currently listed.
+                    </p>
+                  )}
+                </div>
               )}
             </div>
           )}
@@ -667,20 +833,34 @@ export default function BookingClient({
                 aria-labelledby="booking-contact-heading"
                 className="mb-5 rounded-md border border-app-border bg-app-surface-muted p-4"
               >
-                {/* <h4
-                  id="booking-contact-heading"
-                  className="text-base font-semibold text-app-ink"
-                >
+                <h4 id="booking-contact-heading" className="text-sm font-medium text-app-ink">
                   The therapist will contact you.
-                </h4> */}
-                {/* <p className="mt-1 text-sm leading-6 text-app-ink-muted">
-                  Enter your phone below to complete your booking.
-                </p> */}
+                </h4>
+                <label
+                  htmlFor="booking-client-name"
+                  className="mb-2 mt-3 block text-sm font-medium text-app-ink"
+                >
+                  Your name
+                </label>
+                <input
+                  id="booking-client-name"
+                  type="text"
+                  autoComplete="name"
+                  maxLength={100}
+                  required
+                  value={clientName}
+                  onChange={(event) => {
+                    setClientName(event.target.value);
+                    setBookingError(null);
+                  }}
+                  placeholder="Enter your name"
+                  className="app-control w-full px-3 text-base"
+                />
                 <label
                   htmlFor="booking-phone-number"
-                  className="mb-2 block text-sm font-medium text-app-ink"
+                  className="mb-2 mt-4 block text-sm font-medium text-app-ink"
                 >
-                  The therapist will contact you.
+                  Phone or WhatsApp number
                 </label>
                 <input
                   id="booking-phone-number"
@@ -702,6 +882,9 @@ export default function BookingClient({
                   placeholder="Enter your phone or WhatsApp "
                   className="app-control w-full px-3 text-base"
                 />
+                <p id="booking-phone-help" className="mt-1 text-xs text-app-ink-muted">
+                  We’ll use this number to contact you about the session.
+                </p>
                 {phoneNumberTouched && !isValidPhoneNumber(phoneNumber) ? (
                   <p
                     id="booking-phone-error"
@@ -720,10 +903,29 @@ export default function BookingClient({
                     {contactStorageError}
                   </p>
                 ) : null}
+                <label
+                  htmlFor="booking-client-notes"
+                  className="mb-2 mt-4 block text-sm font-medium text-app-ink"
+                >
+                  Notes for the therapist <span className="font-normal text-app-ink-muted">· optional</span>
+                </label>
+                <textarea
+                  id="booking-client-notes"
+                  rows={3}
+                  maxLength={1000}
+                  value={clientNotes}
+                  onChange={(event) => setClientNotes(event.target.value)}
+                  placeholder="Anything you’d like the therapist to know before your session?"
+                  className="app-textarea"
+                />
               </section>
 
               <h4 className="mb-2 text-sm font-medium">Summary</h4>
               <div className="divide-y divide-app-border rounded-md border border-app-border bg-app-surface px-4">
+                <p className="py-3 text-sm">
+                  <span className="font-medium">Client</span><br />
+                  {clientName.trim() || "Enter your name"}
+                </p>
                 <p className="py-3 text-sm">
                   <span className="font-medium">Treatment</span><br />
                   {selectedOffering?.massageType}
@@ -736,19 +938,25 @@ export default function BookingClient({
                 <p className="py-3 text-sm">
                   <span className="font-medium">Date and time</span><br />
                   {selectedDate} at{" "}
-                  {selectedTime}
+                  {selectedTime} · Africa/Accra
                 </p>
+                {clientNotes.trim() ? (
+                  <p className="py-3 text-sm">
+                    <span className="font-medium">Notes</span><br />
+                    <span className="whitespace-pre-wrap">{clientNotes.trim()}</span>
+                  </p>
+                ) : null}
                 <p className="flex items-center justify-between py-3 text-sm">
                   <span className="font-medium">Total</span>
-                  <span className="text-base font-semibold">{formatGhs(selectedOffering?.price ?? 0)}</span>
+                  <span className="text-base font-semibold">{formatGhs(effectiveSelectedOffering?.price ?? 0)}</span>
                 </p>
               </div>
 
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                 <button
-                  disabled={!canProceedToSummary() || !isValidPhoneNumber(phoneNumber)}
+                  disabled={!canProceedToSummary() || !clientName.trim() || !isValidPhoneNumber(phoneNumber)}
                   onClick={handleConfirm}
-                  className={`app-button flex-1 ${canProceedToSummary() && isValidPhoneNumber(phoneNumber) ? "app-button-primary" : "app-button-secondary"}`}
+                  className={`app-button flex-1 ${canProceedToSummary() && clientName.trim() && isValidPhoneNumber(phoneNumber) ? "app-button-primary" : "app-button-secondary"}`}
                 >
                   Confirm Booking
                 </button>
@@ -776,7 +984,8 @@ export default function BookingClient({
                   {modalOffering.massageType}
                 </h4>
                 <p className="mt-1 text-sm text-app-ink-muted">
-                  {modalOffering.durationMinutes} mins • {formatGhs(modalOffering.price)}
+                  {providerSettings?.sessionDurationMinutes ?? modalOffering.durationMinutes} mins •{" "}
+                  {formatGhs(providerSettings?.sessionFee ?? modalOffering.price)}
                 </p>
               </div>
               <button

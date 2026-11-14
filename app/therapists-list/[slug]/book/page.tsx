@@ -5,10 +5,16 @@ export const dynamic = "force-dynamic";
 export default async function BookingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ repeat?: string | string[] }>;
+  searchParams: Promise<{
+    repeat?: string | string[];
+    reschedule?: string | string[];
+  }>;
 }) {
-  const { repeat } = await searchParams;
+  const { repeat, reschedule } = await searchParams;
   const repeatBookingId = Array.isArray(repeat) ? repeat[0] : repeat;
+  const rescheduleRequested = Array.isArray(reschedule)
+    ? reschedule[0] === "true"
+    : reschedule === "true";
 
   return (
     <main className="app-page min-h-screen flex-1 font-sans">
@@ -36,7 +42,10 @@ export default async function BookingPage({
           <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Book your massage</h1>
           <p className="mt-2 text-sm leading-6 text-app-ink-muted">Choose a treatment, a location, and a time that works for you.</p>
         </div> */}
-        <BookingClient repeatBookingId={repeatBookingId} />
+        <BookingClient
+          repeatBookingId={repeatBookingId}
+          rescheduleBookingId={rescheduleRequested ? repeatBookingId : undefined}
+        />
       </div>
     </main>
   );

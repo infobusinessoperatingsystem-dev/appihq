@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import SiteFooter from "./SiteFooter";
+import BottomNav from "./BottomNav";
 import { cn } from "@/lib/utils";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
@@ -28,8 +29,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
     >
       <body className="flex min-h-full flex-col">
-        {children}
-        <SiteFooter />
+        <div className="flex flex-1 flex-col pb-[calc(6rem+env(safe-area-inset-bottom))]">
+          {children}
+          <SiteFooter />
+        </div>
+        <BottomNav />
       </body>
     </html>
   );

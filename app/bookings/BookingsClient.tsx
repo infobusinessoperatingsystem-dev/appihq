@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { deleteSavedBooking, readSavedBookings, type SavedBooking } from "../booking-data";
+import {
+  deleteSavedBooking,
+  readSavedBookingsStrict,
+  type SavedBooking,
+} from "../booking-data";
 import { formatGhs } from "../money";
 
 type BookingFilter = "all" | "upcoming" | "past";
@@ -39,15 +43,26 @@ export default function BookingsClient() {
   const [bookings, setBookings] = useState<SavedBooking[]>([]);
   const [filter, setFilter] = useState<BookingFilter>("all");
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
   const [bookingToRemove, setBookingToRemove] = useState<SavedBooking | null>(null);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
-      setBookings(readSavedBookings());
-      setHasLoaded(true);
+      try {
+        setBookings(readSavedBookingsStrict());
+        setLoadError("");
+      } catch {
+        setBookings([]);
+        setLoadError(
+          "We couldn’t read your saved bookings from this browser. Check your storage settings and try again.",
+        );
+      } finally {
+        setHasLoaded(true);
+      }
     });
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [retryCount]);
 
   const visibleBookings = useMemo(() => {
     const today = todayAsIsoDate();
@@ -68,6 +83,28 @@ export default function BookingsClient() {
 
   if (!hasLoaded) {
     return <p className="app-surface rounded-md p-6 text-sm text-app-ink-muted">Loading saved bookings…</p>;
+  }
+
+  if (loadError) {
+    return (
+      <section
+        role="alert"
+        className="app-surface rounded-md border border-red-200 p-6 sm:p-8"
+      >
+        <h2 className="text-lg font-semibold text-app-ink">We couldn’t load your bookings</h2>
+        <p className="mt-2 text-sm leading-6 text-app-ink-muted">{loadError}</p>
+        <button
+          type="button"
+          onClick={() => {
+            setHasLoaded(false);
+            setRetryCount((count) => count + 1);
+          }}
+          className="app-button app-button-primary mt-5"
+        >
+          Retry
+        </button>
+      </section>
+    );
   }
 
   return (
@@ -96,6 +133,15 @@ export default function BookingsClient() {
         <ul className="space-y-3">
           {visibleBookings.map((booking) => {
             const isUpcoming = booking.date >= todayAsIsoDate();
+            const status = booking.status ?? "confirmed";
+            const statusLabel =
+              status === "confirmed"
+                ? isUpcoming
+                  ? "Upcoming"
+                  : "Past"
+                : status === "cancelled"
+                  ? "Cancelled"
+                  : "Rescheduled";
             return (
               <li key={booking.id}>
                 <article className="app-surface rounded-md p-4 sm:p-5">
@@ -103,8 +149,14 @@ export default function BookingsClient() {
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <h2 className="text-lg font-semibold">{booking.treatment}</h2>
-                        <span className="rounded-full bg-app-surface-muted px-2.5 py-1 text-xs font-medium text-app-primary">
-                          {isUpcoming ? "Upcoming" : "Past"}
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                          status === "cancelled"
+                            ? "bg-red-50 text-red-800"
+                            : status === "rescheduled"
+                              ? "bg-app-surface-muted text-app-ink-muted"
+                              : "bg-app-surface-muted text-app-primary"
+                        }`}>
+                          {statusLabel}
                         </span>
                         {/* <span className="rounded-full border border-app-border px-2.5 py-1 text-xs text-app-ink-muted">Demo · local only</span> */}
                       </div>

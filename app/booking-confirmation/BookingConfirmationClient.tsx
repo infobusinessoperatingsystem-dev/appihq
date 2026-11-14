@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AlertCircle, Check } from "lucide-react";
 import { readSavedBooking, type SavedBooking } from "../booking-data";
 import { formatGhs } from "../money";
 
@@ -36,10 +37,16 @@ export default function BookingConfirmationClient({ bookingId }: { bookingId?: s
 
   return (
     <section className="confirmation-panel app-surface mt-6 rounded-md p-6 shadow-sm sm:p-10">
-      <div className="confirmation-mark mx-auto flex size-26 items-center justify-center rounded-full bg-app-surface-muted text-app-success">
-        <svg aria-hidden="true" viewBox="0 0 24 24" className="confirmation-check size-16" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
-          <path d="m5 12 4 4L19 6" />
-        </svg>
+      <div
+        className={`confirmation-mark mx-auto flex size-26 items-center justify-center rounded-full bg-app-surface-muted ${
+          booking ? "text-app-success" : "text-app-accent"
+        }`}
+      >
+        {booking ? (
+          <Check aria-hidden="true" className="confirmation-check size-16" />
+        ) : (
+          <AlertCircle aria-hidden="true" className="size-14" />
+        )}
       </div>
 
       <h1 className="mt-5 text-center text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -71,6 +78,16 @@ export default function BookingConfirmationClient({ bookingId }: { bookingId?: s
             <div className="flex flex-wrap justify-between gap-2 py-3 text-sm">
               <dt className="text-app-ink-muted">Date and time</dt>
               <dd className="font-medium">{formatDate(booking.date)} at {formatTime(booking.time)}</dd>
+            </div>
+            <div className="flex flex-wrap justify-between gap-2 py-3 text-sm">
+              <dt className="text-app-ink-muted">Timezone</dt>
+              <dd className="font-medium">{booking.timeZone ?? "Africa/Accra"}</dd>
+            </div>
+            <div className="flex flex-wrap justify-between gap-2 py-3 text-sm">
+              <dt className="text-app-ink-muted">Phone / WhatsApp</dt>
+              <dd className="max-w-sm wrap-break-word text-right font-medium">
+                {booking.phoneNumber || "Not provided"}
+              </dd>
             </div>
             <div className="flex flex-wrap justify-between gap-2 py-3 text-sm">
               <dt className="text-app-ink-muted">Total</dt>

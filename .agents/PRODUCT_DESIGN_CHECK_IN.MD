@@ -1,0 +1,2 @@
+# Product Designer Check-In
+- WhatsApp is a huge advantage. Since your confirmation screen already captures Phone/WhatsApp, lean into one-tap "Add to Calendar" and "Message on WhatsApp" actions—therapy clients rely heavily on mobile reminders.
