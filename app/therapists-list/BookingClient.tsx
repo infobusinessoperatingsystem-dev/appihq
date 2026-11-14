@@ -528,8 +528,8 @@ export default function BookingClient({
                       setBookingError(null);
                     }}
                     placeholder={selectedLocation === "home"
-                      ? "Enter your house number, street, suburb, city, and a nearby landmark"
-                      : "Enter the hotel name, street address, and lobby or room details"}
+                      ? "Enter area, or street name, and a nearby landmark"
+                      : "Enter the hotel name, and room number"}
                     className="app-textarea"
                   />
                   {/* <p className="mt-2 text-xs leading-5 text-app-ink-muted">
@@ -699,7 +699,7 @@ export default function BookingClient({
                     !isValidPhoneNumber(phoneNumber)
                   }
                   aria-describedby="booking-phone-help booking-phone-error"
-                  placeholder="Enter your phone"
+                  placeholder="Enter your phone or WhatsApp "
                   className="app-control w-full px-3 text-base"
                 />
                 {phoneNumberTouched && !isValidPhoneNumber(phoneNumber) ? (
