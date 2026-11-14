@@ -73,7 +73,7 @@ export default function SubscribePage() {
           <Link href="/" className="app-link text-xl font-semibold tracking-tight" aria-label="Back to Appi home">
             <span className="italic">App</span>i
           </Link>
-          <Link href="/therapists-list" className="app-link inline-flex items-center gap-2 text-sm font-medium">
+          <Link href="/" className="app-link inline-flex items-center gap-2 text-sm font-medium">
             Browse therapists
             <span aria-hidden="true">&#8599;</span>
           </Link>
@@ -127,7 +127,7 @@ export default function SubscribePage() {
             </div>
           </div>
 
-          <Link href="/therapists-list" className="app-button app-button-primary w-full">
+          <Link href="/" className="app-button app-button-primary w-full">
             Start your membership
           </Link>
           <p className="mt-2 text-center text-xs leading-5 text-white/65">No name or phone number required.</p>

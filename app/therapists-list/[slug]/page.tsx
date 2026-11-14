@@ -63,7 +63,7 @@ export default async function TherapistProfilePage({
             />
             <div className="absolute inset-x-0 top-0 flex items-center justify-between p-5">
               <Link
-                href="/therapists-list"
+                href="/"
                 aria-label="Back to therapist list"
                 className="app-icon-button-overlay"
               >

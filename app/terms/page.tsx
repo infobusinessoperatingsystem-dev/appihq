@@ -25,7 +25,7 @@ export default function TermsPage() {
       <header className="border-b border-app-border bg-app-surface">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
           <Link href="/" className="app-link text-xl font-semibold tracking-tight"><span className="italic">App</span>i</Link>
-          <Link href="/therapists-list" className="app-link text-sm font-medium">Browse therapists</Link>
+          <Link href="/" className="app-link text-sm font-medium">Browse therapists</Link>
         </div>
       </header>
 

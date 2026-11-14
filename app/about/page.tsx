@@ -139,7 +139,7 @@ export default function AboutPage() {
             <p className="text-sm text-white/65">Appi — Empowering independent professionals</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">For a more independent tomorrow.</h2>
           </div>
-          <Link href="/therapists-list" className="app-button app-button-primary">Browse massage therapists <span aria-hidden="true">&#8599;</span></Link>
+          <Link href="/" className="app-button app-button-primary">Browse massage therapists <span aria-hidden="true">&#8599;</span></Link>
         </div>
       </section>
     </main>
