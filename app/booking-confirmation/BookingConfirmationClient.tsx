@@ -49,6 +49,8 @@ export default function BookingConfirmationClient({ bookingId }: { bookingId?: s
       {booking ? (
         <>
           <p className="mt-2 text-center text-app-ink-muted">Your therapist will contact you shortly before your scheduled appointment.<br /> Have a great session ahead!</p>
+          {/* The therapist will contact you. Enter your details below to complete your booking. 
+          [Phone/WhatsApp] */}
           <dl className="mt-7 divide-y divide-app-border rounded-md border border-app-border px-4">
             <div className="flex flex-wrap justify-between gap-2 py-3 text-sm">
               <dt className="text-app-ink-muted">Therapist</dt>
