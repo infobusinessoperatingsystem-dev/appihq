@@ -17,6 +17,7 @@ export type SavedBooking = {
   date: string;
   time: string;
   price: number;
+  phoneNumber?: string;
   createdAt: string;
   demo: true;
 };
@@ -37,6 +38,7 @@ function isSavedBooking(value: unknown): value is SavedBooking {
     typeof booking.date === "string" &&
     typeof booking.time === "string" &&
     typeof booking.price === "number" &&
+    (booking.phoneNumber === undefined || typeof booking.phoneNumber === "string") &&
     typeof booking.createdAt === "string" &&
     booking.demo === true
   );

@@ -12,7 +12,6 @@ import type {
 import Image from "next/image";
 import { readSavedBooking, saveBooking, type SavedBooking } from "../booking-data";
 import { formatGhs } from "../money";
-import Link from "next/link";
 
 type Props = { therapist?: Therapist; repeatBookingId?: string };
 
@@ -20,6 +19,15 @@ const emptyOfferings: MassageOffering[] = [];
 const emptyAvailability: TherapistAvailability[] = [];
 const emptyServiceLocations: ServiceLocation[] = [];
 const emptyWalkInLocations: WalkInLocation[] = [];
+const CONTACT_NUMBER_STORAGE_KEY = "appi.contact-number.v1";
+
+function isValidPhoneNumber(value: string) {
+  const trimmedValue = value.trim();
+  if (!/^\+?[\d\s().-]+$/.test(trimmedValue)) return false;
+
+  const digitCount = trimmedValue.replace(/\D/g, "").length;
+  return digitCount >= 7 && digitCount <= 15;
+}
 
 function pad(n: number) {
   return n.toString().padStart(2, "0");
@@ -109,11 +117,30 @@ export default function BookingClient({
     availability[0]?.date || null,
   );
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumberTouched, setPhoneNumberTouched] = useState(false);
+  const [contactStorageError, setContactStorageError] = useState<string | null>(null);
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [repeatError, setRepeatError] = useState<string | null>(null);
   const [modalOffering, setModalOffering] = useState<MassageOffering | null>(
     null,
   );
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      try {
+        setPhoneNumber(
+          window.localStorage.getItem(CONTACT_NUMBER_STORAGE_KEY) ?? "",
+        );
+      } catch {
+        setContactStorageError(
+          "This browser could not access saved contact details. Check storage settings and try again.",
+        );
+      }
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     if (!therapist) return;
@@ -145,6 +172,7 @@ export default function BookingClient({
       setSelectedWalkInLocationId(walkInLocation?.id ?? "");
       setSelectedDate(savedBooking.date);
       setSelectedTime(savedBooking.time);
+      if (savedBooking.phoneNumber) setPhoneNumber(savedBooking.phoneNumber);
       setStep(3);
       setRepeatError(null);
     });
@@ -224,8 +252,33 @@ export default function BookingClient({
     );
   }
 
+  function handlePhoneNumberChange(value: string) {
+    setPhoneNumber(value);
+    setPhoneNumberTouched(false);
+    setBookingError(null);
+    try {
+      window.localStorage.setItem(CONTACT_NUMBER_STORAGE_KEY, value);
+      setContactStorageError(null);
+    } catch {
+      setContactStorageError(
+        "This browser could not save your contact number. Check storage settings and try again.",
+      );
+    }
+  }
+
   function handleConfirm() {
-    if (!therapist || !selectedOffering || !selectedLocation || !selectedDate || !selectedTime || !canProceedFromLocation()) return;
+    if (
+      !therapist ||
+      !selectedOffering ||
+      !selectedLocation ||
+      !selectedDate ||
+      !selectedTime ||
+      !canProceedFromLocation() ||
+      !isValidPhoneNumber(phoneNumber)
+    ) {
+      setPhoneNumberTouched(true);
+      return;
+    }
 
     const booking: SavedBooking = {
       id: crypto.randomUUID(),
@@ -238,6 +291,7 @@ export default function BookingClient({
       date: selectedDate,
       time: selectedTime,
       price: selectedOffering.price,
+      phoneNumber: phoneNumber.trim(),
       createdAt: new Date().toISOString(),
       demo: true,
     };
@@ -564,6 +618,69 @@ export default function BookingClient({
 
           {step >= 3 && (
             <div>
+              <section
+                aria-labelledby="booking-contact-heading"
+                className="mb-5 rounded-md border border-app-border bg-app-surface-muted p-4"
+              >
+                <h4
+                  id="booking-contact-heading"
+                  className="text-base font-semibold text-app-ink"
+                >
+                  The therapist will contact you.
+                </h4>
+                <p className="mt-1 text-sm leading-6 text-app-ink-muted">
+                  Enter your details below to complete your booking.
+                </p>
+                <label
+                  htmlFor="booking-phone-number"
+                  className="mb-2 mt-4 block text-sm font-medium text-app-ink"
+                >
+                  Phone / WhatsApp
+                </label>
+                <input
+                  id="booking-phone-number"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  maxLength={30}
+                  value={phoneNumber}
+                  onChange={(event) =>
+                    handlePhoneNumberChange(event.target.value)
+                  }
+                  onBlur={() => setPhoneNumberTouched(true)}
+                  aria-invalid={
+                    phoneNumberTouched &&
+                    phoneNumber.length > 0 &&
+                    !isValidPhoneNumber(phoneNumber)
+                  }
+                  aria-describedby="booking-phone-help booking-phone-error"
+                  placeholder="+1 555 123 4567"
+                  className="app-control w-full px-3 text-base"
+                />
+                {/* <p id="booking-phone-help" className="mt-2 text-xs text-app-ink-muted">
+                  Include your country code if needed. Enter 7 to 15 digits;
+                  spaces, parentheses, hyphens, and a leading + are accepted.
+                </p> */}
+                {phoneNumberTouched && !isValidPhoneNumber(phoneNumber) ? (
+                  <p
+                    id="booking-phone-error"
+                    role="alert"
+                    className="mt-2 text-sm text-red-700 dark:text-red-300"
+                  >
+                    {phoneNumber.trim()
+                      ? "Enter a valid phone number with 7 to 15 digits."
+                      : "Enter a phone or WhatsApp number to continue."}
+                  </p>
+                ) : (
+                  <span id="booking-phone-error" />
+                )}
+                {contactStorageError ? (
+                  <p role="alert" className="mt-2 text-sm text-red-700 dark:text-red-300">
+                    {contactStorageError}
+                  </p>
+                ) : null}
+              </section>
+
               <h4 className="mb-2 text-sm font-medium">Summary</h4>
               <div className="divide-y divide-app-border rounded-md border border-app-border bg-app-surface px-4">
                 <p className="py-3 text-sm">
@@ -588,9 +705,9 @@ export default function BookingClient({
 
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                 <button
-                  disabled={!canProceedToSummary()}
+                  disabled={!canProceedToSummary() || !isValidPhoneNumber(phoneNumber)}
                   onClick={handleConfirm}
-                  className={`app-button flex-1 ${canProceedToSummary() ? "app-button-primary" : "app-button-secondary"}`}
+                  className={`app-button flex-1 ${canProceedToSummary() && isValidPhoneNumber(phoneNumber) ? "app-button-primary" : "app-button-secondary"}`}
                 >
                   Confirm Booking
                 </button>

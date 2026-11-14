@@ -36,20 +36,41 @@ const values = [
 
 export default function AboutPage() {
   return (
-    <main className="app-page min-h-screen flex-1 overflow-hidden">
-      <header className="border-b border-app-border bg-app-surface">
+    <main className="app-page min-h-screen flex-1 overflow-hidden px-5 py-10 sm:px-8 sm:py-16">
+      <Link
+        href="/"
+        aria-label="Back to Appi home"
+        className="app-icon-button mb-4 border-0 bg-transparent"
+      >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className="size-5"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+        >
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+      </Link>
+      {/* <header className="border-b border-app-border bg-app-surface">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
           <Link href="/" className="app-link text-xl font-semibold tracking-tight" aria-label="Appi home"><span className="italic">App</span>i</Link>
-          <Link href="/therapists-list" className="app-link text-sm font-medium">Find a therapist <span aria-hidden="true">&#8599;</span></Link>
+          <Link href="/" className="app-link text-sm font-medium">Find a therapist <span aria-hidden="true">&#8599;</span></Link>
         </div>
-      </header>
+      </header> */}
 
       <section className="relative isolate overflow-hidden bg-app-brand text-white">
         <div aria-hidden="true" className="absolute -right-32 -top-56 size-136 rounded-full border-[5rem] border-white/6" />
         <div className="relative mx-auto grid max-w-6xl gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
           <div>
-            <p className="mb-6 text-xs font-semibold uppercase tracking-[0.22em] text-orange-300">Find · Book · Empower</p>
-            <h1 className="max-w-3xl text-5xl font-semibold leading-[1.02] tracking-tight sm:text-7xl">Your skills.<br />Your work.<br /><span className="text-orange-400">Your independence.</span></h1>
+            {/* <p className="mb-20 text-xs font-semibold uppercase tracking-[0.22em] text-orange-300">Find · Book · Empower</p> */}
+            <Link href="/" aria-label="Appi home" className="app-link text-2xl pb-20 block font-semibold tracking-tight">
+            <span className="italic">App</span>i
+          </Link>
+            <h1 className="max-w-3xl text-5xl font-semibold leading-[1.02] tracking-tight sm:text-7xl">At<span className="text-orange-400"> your service.</span></h1>
             <p className="mt-7 max-w-xl text-lg leading-8 text-white/75">We believe people should own more of the value they create. Appi is building practical ways for independent professionals to meet clients and grow on their own terms.</p>
           </div>
           <div className="border-l border-white/25 pl-6 lg:mb-2">
