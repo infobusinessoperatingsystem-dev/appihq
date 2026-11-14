@@ -436,6 +436,11 @@ function TherapistCard({
               />
             ))}
           </div>
+          {therapist.isDemo ? (
+            <span className="absolute right-2 top-7 z-20 rounded-full border border-white/30 bg-black/65 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white shadow-sm">
+              Sample profile
+            </span>
+          ) : null}
 
           <button
             type="button"

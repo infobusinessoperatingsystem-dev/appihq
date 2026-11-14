@@ -667,20 +667,20 @@ export default function BookingClient({
                 aria-labelledby="booking-contact-heading"
                 className="mb-5 rounded-md border border-app-border bg-app-surface-muted p-4"
               >
-                <h4
+                {/* <h4
                   id="booking-contact-heading"
                   className="text-base font-semibold text-app-ink"
                 >
                   The therapist will contact you.
-                </h4>
-                <p className="mt-1 text-sm leading-6 text-app-ink-muted">
-                  Enter your details below to complete your booking.
-                </p>
+                </h4> */}
+                {/* <p className="mt-1 text-sm leading-6 text-app-ink-muted">
+                  Enter your phone below to complete your booking.
+                </p> */}
                 <label
                   htmlFor="booking-phone-number"
-                  className="mb-2 mt-4 block text-sm font-medium text-app-ink"
+                  className="mb-2 block text-sm font-medium text-app-ink"
                 >
-                  Phone / WhatsApp
+                  The therapist will contact you.
                 </label>
                 <input
                   id="booking-phone-number"
@@ -699,13 +699,9 @@ export default function BookingClient({
                     !isValidPhoneNumber(phoneNumber)
                   }
                   aria-describedby="booking-phone-help booking-phone-error"
-                  placeholder="+1 555 123 4567"
+                  placeholder="Enter your phone"
                   className="app-control w-full px-3 text-base"
                 />
-                {/* <p id="booking-phone-help" className="mt-2 text-xs text-app-ink-muted">
-                  Include your country code if needed. Enter 7 to 15 digits;
-                  spaces, parentheses, hyphens, and a leading + are accepted.
-                </p> */}
                 {phoneNumberTouched && !isValidPhoneNumber(phoneNumber) ? (
                   <p
                     id="booking-phone-error"
