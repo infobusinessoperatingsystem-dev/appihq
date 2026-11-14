@@ -353,20 +353,65 @@ export default function BookingClient({
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 self-start rounded-full bg-app-surface-muted px-3 py-1.5 text-sm text-app-ink sm:self-center">
+          {/* <div className="flex items-center gap-2 self-start rounded-full bg-app-surface-muted px-3 py-1.5 text-sm text-app-ink sm:self-center">
             <span aria-hidden="true" className="text-app-accent">★</span>
             <span className="font-semibold">{therapist.rating}</span>
             <span className="text-app-ink-muted">({therapist.reviewCount} reviews)</span>
-          </div>
+          </div> */}
         </div>
 
         <div className="px-4 pt-5 sm:px-6 sm:pt-6">
           <ol aria-label="Booking progress" className="grid grid-cols-4">
             {["Treatment", "Location", "Time", "Review"].map((label, index) => (
               <li key={label} className="relative flex flex-col items-center text-center">
-                {index < 3 && <span aria-hidden="true" className={`absolute left-1/2 top-4 h-px w-full ${step > index ? "bg-app-primary" : "bg-app-border"}`} />}
-                <span className={`relative z-10 flex size-8 items-center justify-center rounded-full border text-xs font-semibold ${step === index ? "border-app-primary bg-app-primary text-white" : step > index ? "border-app-accent bg-app-surface-muted text-app-ink" : "border-app-border bg-app-surface text-app-ink-muted"}`}>{index + 1}</span>
-                <span className={`mt-2 text-[11px] sm:text-xs ${step === index ? "font-semibold text-app-ink" : "text-app-ink-muted"}`}>{label}</span>
+                {index < 3 && (
+                  <span
+                    aria-hidden="true"
+                    className="booking-step-connector absolute left-1/2 top-4 h-px w-full bg-app-border"
+                  >
+                    <span
+                      className={`booking-step-connector-fill block h-full origin-left bg-app-primary ${
+                        step > index ? "is-complete" : ""
+                      }`}
+                    />
+                  </span>
+                )}
+                <span
+                  aria-current={step === index ? "step" : undefined}
+                  className={`booking-step-marker relative z-10 flex size-8 items-center justify-center rounded-full border text-xs font-semibold ${
+                    step === index
+                      ? "booking-step-marker-active border-app-primary bg-app-primary text-white"
+                      : step > index
+                        ? "booking-step-marker-complete border-app-primary bg-app-primary text-white"
+                        : "border-app-border bg-app-surface text-app-ink-muted"
+                  }`}
+                >
+                  {step > index ? (
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="3"
+                      className="booking-step-check size-4"
+                    >
+                      <path d="m5 12 4 4L19 6" />
+                    </svg>
+                  ) : (
+                    index + 1
+                  )}
+                </span>
+                <span
+                  className={`booking-step-label mt-2 text-[11px] sm:text-xs ${
+                    step === index
+                      ? "booking-step-label-active font-semibold text-app-ink"
+                      : "text-app-ink-muted"
+                  }`}
+                >
+                  {label}
+                </span>
               </li>
             ))}
           </ol>

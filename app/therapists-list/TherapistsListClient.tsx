@@ -641,7 +641,7 @@ function TherapistCard({
                           </div>
                           {therapist.isVerified ? (
                             <>
-                              <span className="mt-1 text-xs text-start text-white/80">
+                              <span className="mt-3 text-xl text-start text-white/80">
                                 Verified{" "}
                                 {formatVerifiedDate(therapist.verifiedAt)}
                               </span>
