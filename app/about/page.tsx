@@ -70,31 +70,31 @@ export default function AboutPage() {
             <Link href="/" aria-label="Appi home" className="app-link text-2xl pb-20 block font-semibold tracking-tight">
             <span className="italic">App</span>i
           </Link>
-            <h1 className="max-w-3xl text-5xl font-semibold leading-[1.02] tracking-tight sm:text-7xl">At<span className="text-orange-400"> your service.</span></h1>
-            <p className="mt-7 max-w-xl text-lg leading-8 text-white/75">We believe people should own more of the value they create. Appi is building practical ways for independent professionals to meet clients and grow on their own terms.</p>
+            <h1 className="max-w-3xl text-4xl font-semibold leading-[1.02] tracking-tight sm:text-6xl">At<span className="text-orange-400"> your service.</span></h1>
+            <p className="mt-7 max-w-xl text-lg leading-8 text-white/75">Appi is building practical ways for independent skilled workers to meet clients and grow - on their own terms.</p>
           </div>
           <div className="border-l border-white/25 pl-6 lg:mb-2">
             <span className="text-sm font-semibold text-orange-300">Where we begin</span>
-            <p className="mt-3 text-2xl font-medium leading-snug">A better way to find and book massage therapists.</p>
+            {/* <p className="mt-3 text-2xl font-medium leading-snug">A better way to find and book massage therapists.</p> */}
             <p className="mt-3 text-sm leading-6 text-white/65">We are developing Appi step by step. Massage therapists are our first service category; we’ll introduce other categories only when they’re ready.</p>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-5 px-5 py-10 sm:px-8 sm:py-14 lg:grid-cols-3">
-        <article className="bg-app-surface-muted p-6 sm:p-8">
+      <section className="mx-auto grid max-w-6xl gap-5 px-5 py-10 sm:px-8 sm:py-14 lg:grid-cols-2">
+        {/* <article className="bg-app-surface-muted p-6 sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-primary">What is Appi?</p>
           <h2 className="mt-4 text-2xl font-semibold tracking-tight">A service marketplace, built with care.</h2>
           <p className="mt-4 text-sm leading-6 text-app-primary/80">Appi connects clients with independent professionals. Today, that means discovering massage therapists, learning about their services, and choosing a provider that suits your needs.</p>
-        </article>
+        </article> */}
         <article className="app-surface p-6 sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-primary">Our mission</p>
-          <h2 className="mt-4 text-2xl font-semibold tracking-tight">Make independent work more possible.</h2>
-          <p className="mt-4 text-sm leading-6 text-zinc-600 dark:text-zinc-300">To give independent professionals more opportunity, useful tools, and freedom to earn from their skills and build better livelihoods.</p>
+          {/* <h2 className="mt-4 text-2xl font-semibold tracking-tight">Make independent work more possible.</h2> */}
+          <p className="mt-4 text-sm leading-6 text-zinc-600 dark:text-zinc-300">To give independent skilled workders the useful tools to enable them to earn from their skills and build better livelihoods.</p>
         </article>
         <article className="bg-app-accent p-6 text-app-accent-ink sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em]">Our vision</p>
-          <h2 className="mt-4 text-2xl font-semibold tracking-tight">A more flexible, independent life.</h2>
+          {/* <h2 className="mt-4 text-2xl font-semibold tracking-tight">A more flexible, independent life.</h2> */}
           <p className="mt-4 text-sm leading-6 text-app-accent-ink/80">A world where people can turn their skills into economic independence, financial opportunity, and more control over their working lives.</p>
         </article>
       </section>
@@ -106,7 +106,7 @@ export default function AboutPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-accent-ink">Our core values</p>
               <h2 className="mt-2 text-3xl font-semibold tracking-tight">A platform should work for people.</h2>
             </div>
-            <p className="max-w-md text-sm leading-6 text-zinc-600 dark:text-zinc-400">These principles shape how we build Appi and how we expect people to treat one another here.</p>
+            <p className="max-w-md text-sm leading-6 text-zinc-600 dark:text-zinc-400">These principles shape how we build Appi.</p>
           </div>
           <div className="mt-8 grid gap-x-8 sm:grid-cols-2 lg:grid-cols-5">
             {values.map((value) => (
@@ -120,7 +120,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-10 px-5 py-12 sm:px-8 sm:py-16 md:grid-cols-2">
+      {/* <section className="mx-auto grid max-w-6xl gap-10 px-5 py-12 sm:px-8 sm:py-16 md:grid-cols-2">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-primary">For clients</p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight">Find care that fits your day.</h2>
@@ -131,15 +131,15 @@ export default function AboutPage() {
           <h2 className="mt-3 text-3xl font-semibold tracking-tight">Build your work on your terms.</h2>
           <p className="mt-4 max-w-lg text-sm leading-7 text-zinc-600 dark:text-zinc-400">Appi is being developed to help massage therapists present their services and connect with people looking for massage care. Therapists remain independent and set their own professional approach, subject to applicable requirements and platform terms.</p>
         </div>
-      </section>
+      </section> */}
 
       <section className="bg-app-brand text-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 sm:px-8 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm text-white/65">Appi — Empowering independent professionals</p>
+            <p className="text-sm text-white/65">Appi — Empowering independent skilled workers</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">For a more independent tomorrow.</h2>
           </div>
-          <Link href="/" className="app-button app-button-primary">Browse massage therapists <span aria-hidden="true">&#8599;</span></Link>
+          <Link href="/" className="app-button app-button-primary">Browse massage therapists</Link>
         </div>
       </section>
     </main>

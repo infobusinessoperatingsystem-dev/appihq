@@ -882,9 +882,9 @@ export default function BookingClient({
                   placeholder="Enter your phone or WhatsApp "
                   className="app-control w-full px-3 text-base"
                 />
-                <p id="booking-phone-help" className="mt-1 text-xs text-app-ink-muted">
+                {/* <p id="booking-phone-help" className="mt-1 text-xs text-app-ink-muted">
                   We’ll use this number to contact you about the session.
-                </p>
+                </p> */}
                 {phoneNumberTouched && !isValidPhoneNumber(phoneNumber) ? (
                   <p
                     id="booking-phone-error"
