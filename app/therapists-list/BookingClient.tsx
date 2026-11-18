@@ -155,6 +155,7 @@ export default function BookingClient({
   const [phoneNumberTouched, setPhoneNumberTouched] = useState(false);
   const [contactStorageError, setContactStorageError] = useState<string | null>(null);
   const [bookingError, setBookingError] = useState<string | null>(null);
+  const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
   const [repeatError, setRepeatError] = useState<string | null>(null);
   const [modalOffering, setModalOffering] = useState<MassageOffering | null>(
     null,
@@ -366,7 +367,8 @@ export default function BookingClient({
     }
   }
 
-  function handleConfirm() {
+  async function handleConfirm() {
+    if (isSubmittingBooking) return;
     if (
       !therapist ||
       !selectedOffering ||
@@ -385,35 +387,89 @@ export default function BookingClient({
       return;
     }
 
-    const booking: SavedBooking = {
-      id: crypto.randomUUID(),
-      therapistSlug: therapist.slug,
-      therapistName: therapist.firstName,
-      clientName: clientName.trim(),
-      notes: clientNotes.trim(),
-      treatment: selectedOffering.massageType,
-      durationMinutes: effectiveSelectedOffering.durationMinutes,
-      serviceLocation: selectedLocation,
-      locationDetails: getLocationDetails(),
-      date: selectedDate,
-      time: selectedTime,
-      price: effectiveSelectedOffering.price,
-      phoneNumber: phoneNumber.trim(),
-      timeZone: "Africa/Accra",
-      createdAt: new Date().toISOString(),
-      demo: true,
-    };
+    setIsSubmittingBooking(true);
+    setBookingError(null);
+    try {
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          therapistSlug: therapist.slug,
+          therapistName: therapist.firstName,
+          clientName: clientName.trim(),
+          phoneNumber: phoneNumber.trim(),
+          therapistNote: clientNotes.trim(),
+          treatment: selectedOffering.massageType,
+          durationMinutes: effectiveSelectedOffering.durationMinutes,
+          serviceLocation: selectedLocation,
+          address: getLocationDetails(),
+          date: selectedDate,
+          time: selectedTime,
+          timeZone: "Africa/Accra",
+          total: effectiveSelectedOffering.price,
+        }),
+      });
+      const result: unknown = await response.json();
+      if (
+        !response.ok ||
+        !result ||
+        typeof result !== "object" ||
+        !("bookingId" in result) ||
+        typeof result.bookingId !== "string" ||
+        !("confirmationToken" in result) ||
+        typeof result.confirmationToken !== "string"
+      ) {
+        const message =
+          result && typeof result === "object" && "error" in result &&
+          typeof result.error === "string"
+            ? result.error
+            : "Your booking couldn’t be saved. Please try again.";
+        throw new Error(message);
+      }
 
-    if (!saveBooking(booking, rescheduleBookingId)) {
-      setBookingError("This browser could not save your booking. Check storage settings and try again.");
-      return;
+      const booking: SavedBooking = {
+        id: result.bookingId,
+        therapistSlug: therapist.slug,
+        therapistName: therapist.firstName,
+        clientName: clientName.trim(),
+        notes: clientNotes.trim(),
+        treatment: selectedOffering.massageType,
+        durationMinutes: effectiveSelectedOffering.durationMinutes,
+        serviceLocation: selectedLocation,
+        locationDetails: getLocationDetails(),
+        date: selectedDate,
+        time: selectedTime,
+        price: effectiveSelectedOffering.price,
+        phoneNumber: phoneNumber.trim(),
+        timeZone: "Africa/Accra",
+        createdAt: new Date().toISOString(),
+        status: "confirmed",
+        demo: true,
+      };
+
+      try {
+        window.sessionStorage.setItem(
+          `appi.booking-confirmation-token.${booking.id}`,
+          result.confirmationToken,
+        );
+      } catch {
+        throw new Error(
+          "Your booking was saved, but secure confirmation could not be opened because browser session storage is unavailable.",
+        );
+      }
+
+      saveBooking(booking, rescheduleBookingId);
+      router.push(
+        `/booking-confirmation?${new URLSearchParams({ bookingId: booking.id })}`,
+      );
+    } catch (error) {
+      setBookingError(
+        error instanceof Error
+          ? error.message
+          : "Your booking couldn’t be saved. Please try again.",
+      );
+      setIsSubmittingBooking(false);
     }
-
-    const query = new URLSearchParams({
-      bookingId: booking.id,
-    });
-
-    router.push(`/booking-confirmation?${query.toString()}`);
   }
 
   if (!therapist) {
@@ -572,7 +628,7 @@ export default function BookingClient({
           {step === 0 && (
             <div>
               <h4 className="mb-2 text-sm font-medium">
-                Choose a massage type
+                Kindly choose a massage type
               </h4>
               <div className="flex flex-col gap-2">
                 {offerings.length === 0 && (
@@ -630,7 +686,7 @@ export default function BookingClient({
           {step === 1 && (
             <div>
               <h4 className="mb-2 text-sm font-medium">
-                Choose a session location
+                Where would you like to have your session? Choose & enter a location
               </h4>
               <div className="grid gap-3 sm:grid-cols-2">
                 {serviceLocations.length === 0 && (
@@ -725,7 +781,7 @@ export default function BookingClient({
 
           {step === 2 && (
             <div>
-              <h4 className="mb-2 text-sm font-medium">Choose date & time</h4>
+              <h4 className="mb-2 text-sm font-medium">What date & time do you want your session?</h4>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="min-w-0">
                   <label htmlFor="booking-date" className="mb-2 block text-sm font-medium text-app-ink">Date</label>
@@ -954,11 +1010,11 @@ export default function BookingClient({
 
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                 <button
-                  disabled={!canProceedToSummary() || !clientName.trim() || !isValidPhoneNumber(phoneNumber)}
+                  disabled={isSubmittingBooking || !canProceedToSummary() || !clientName.trim() || !isValidPhoneNumber(phoneNumber)}
                   onClick={handleConfirm}
                   className={`app-button flex-1 ${canProceedToSummary() && clientName.trim() && isValidPhoneNumber(phoneNumber) ? "app-button-primary" : "app-button-secondary"}`}
                 >
-                  Confirm Booking
+                  {isSubmittingBooking ? "Saving booking…" : "Confirm Booking"}
                 </button>
                 <button
                   onClick={() => setStep(2)}

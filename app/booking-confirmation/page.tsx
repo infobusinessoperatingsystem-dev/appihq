@@ -4,6 +4,8 @@ import BookingConfirmationClient from "./BookingConfirmationClient";
 export const metadata: Metadata = {
   title: "Booking Summary | Appi",
   description: "Review your massage booking details on Appi.",
+  robots: { index: false, follow: false },
+  referrer: "no-referrer",
 };
 
 type SearchParams = Promise<{

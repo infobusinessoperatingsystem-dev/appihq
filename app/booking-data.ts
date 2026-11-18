@@ -28,7 +28,7 @@ export type SavedBooking = {
 
 const STORAGE_KEY = "appi.bookings.v1";
 
-function isSavedBooking(value: unknown): value is SavedBooking {
+export function isSavedBooking(value: unknown): value is SavedBooking {
   if (!value || typeof value !== "object") return false;
   const booking = value as Partial<SavedBooking>;
   return (

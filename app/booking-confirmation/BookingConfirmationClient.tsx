@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AlertCircle, Check } from "lucide-react";
-import { readSavedBooking, type SavedBooking } from "../booking-data";
+import { isSavedBooking, type SavedBooking } from "../booking-data";
 import { formatGhs } from "../money";
 
 function formatDate(value: string) {
@@ -23,13 +23,92 @@ function formatTime(value: string) {
 
 export default function BookingConfirmationClient({ bookingId }: { bookingId?: string }) {
   const [booking, setBooking] = useState<SavedBooking | null | undefined>(undefined);
+  const [loadError, setLoadError] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
+    const controller = new AbortController();
     const frame = requestAnimationFrame(() => {
-      setBooking(bookingId ? readSavedBooking(bookingId) ?? null : null);
+      void (async () => {
+        setBooking(undefined);
+        setLoadError("");
+
+        if (!bookingId) {
+          setBooking(null);
+          return;
+        }
+
+        let token: string | null;
+        try {
+          token = window.sessionStorage.getItem(
+            `appi.booking-confirmation-token.${bookingId}`,
+          );
+        } catch {
+          setLoadError(
+            "We couldn’t access the secure confirmation for this booking in this browser session.",
+          );
+          return;
+        }
+
+        if (!token) {
+          setBooking(null);
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `/api/bookings/${encodeURIComponent(bookingId)}/confirmation`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ confirmationToken: token }),
+              cache: "no-store",
+              signal: controller.signal,
+            },
+          );
+          const result: unknown = await response.json();
+
+          if (!response.ok) {
+            if (response.status === 404) {
+              setBooking(null);
+              return;
+            }
+            throw new Error(
+              result &&
+                typeof result === "object" &&
+                "error" in result &&
+                typeof result.error === "string"
+                ? result.error
+                : "Booking details are temporarily unavailable.",
+            );
+          }
+
+          if (
+            !result ||
+            typeof result !== "object" ||
+            !("booking" in result) ||
+            !isSavedBooking(result.booking)
+          ) {
+            throw new Error("The booking details returned by the server are invalid.");
+          }
+
+          setBooking(result.booking);
+        } catch (error) {
+          if (controller.signal.aborted) return;
+          setLoadError(
+            error instanceof Error
+              ? error.message
+              : "Booking details are temporarily unavailable.",
+          );
+        }
+      })();
     });
-    return () => cancelAnimationFrame(frame);
-  }, [bookingId]);
+
+    return () => {
+      controller.abort();
+      cancelAnimationFrame(frame);
+    };
+  }, [bookingId, retryCount]);
 
   if (booking === undefined) {
     return <p className="text-center text-sm text-app-ink-muted">Loading your booking summary…</p>;
@@ -50,15 +129,35 @@ export default function BookingConfirmationClient({ bookingId }: { bookingId?: s
       </div>
 
       <h1 className="mt-5 text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-        {booking ? "Booking confirmed" : "Booking not found"}
+        {booking
+          ? "Booking confirmed"
+          : loadError
+            ? "We couldn’t load your booking"
+            : "Booking not found"}
       </h1>
 
-      {booking ? (
+      {loadError ? (
+        <div role="alert" className="mt-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+          <p>{loadError}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setBooking(undefined);
+              setRetryCount((count) => count + 1);
+            }}
+            className="mt-3 font-semibold underline"
+          >
+            Retry
+          </button>
+        </div>
+      ) : booking ? (
         <>
           <p className="mt-2 text-center text-app-ink-muted">Your therapist will contact you shortly before your scheduled appointment.<br /> Have a great session ahead!</p>
-          {/* The therapist will contact you. Enter your details below to complete your booking. 
-          [Phone/WhatsApp] */}
           <dl className="mt-7 divide-y divide-app-border rounded-md border border-app-border px-4">
+            <div className="flex flex-wrap justify-between gap-2 py-3 text-sm">
+              <dt className="text-app-ink-muted">Client</dt>
+              <dd className="font-medium">{booking.clientName || "Not provided"}</dd>
+            </div>
             <div className="flex flex-wrap justify-between gap-2 py-3 text-sm">
               <dt className="text-app-ink-muted">Therapist</dt>
               <dd className="font-medium">{booking.therapistName}</dd>
@@ -92,6 +191,12 @@ export default function BookingConfirmationClient({ bookingId }: { bookingId?: s
             <div className="flex flex-wrap justify-between gap-2 py-3 text-sm">
               <dt className="text-app-ink-muted">Total</dt>
               <dd className="text-base font-semibold">{formatGhs(booking.price)}</dd>
+            </div>
+            <div className="py-3 text-sm">
+              <dt className="text-app-ink-muted">Note for the therapist</dt>
+              <dd className="mt-1 whitespace-pre-wrap font-medium">
+                {booking.notes?.trim() || "No note provided"}
+              </dd>
             </div>
           </dl>
         </>
