@@ -15,3 +15,16 @@ The database has row-level security enabled and grants table access only to
 `service_role`. The app uses server route handlers to create bookings and
 retrieve a booking confirmation with its one-time-per-booking secret token.
 Only the SHA-256 hash of that token is stored with the booking.
+
+book a massage
+massage therapist in Kumasi
+massage
+massage near me
+book a massage appointment
+massage booking online
+home massage service Accra
+massage therapist at home
+in-home massage booking
+Swedish massage
+massage services in Kumasi
+massage prices
